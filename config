@@ -1,0 +1,6 @@
+[sql]
+host: localhost
+username: irc
+password: salajane
+# Optional, if not defined script will make database %username%_irc
+# database: irc_irc
