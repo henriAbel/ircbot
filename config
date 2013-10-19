@@ -2,5 +2,12 @@
 host: localhost
 username: irc
 password: salajane
-# Optional, if not defined script will make database %username%_irc
-# database: irc_irc
+database: irc_irc
+
+[irc]
+server: someserver.eu
+channel: #channel
+channel_password: password
+port: 6667
+log_file: log.txt3
+ssl: true
