@@ -8,14 +8,11 @@ if __name__ == '__main__':
 								 passwd=config.get_option("password"))
 	cursor = connection.cursor()
 	if config.get_option("database") is None:
-		# check if database exists
 		database_name = config.get_option("username") + "_irc"
-		cursor.execute("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s", database_name)
-		if cursor.rowcount == 0:
-			cursor.execute("CREATE DATABASE IF NOT EXISTS %s", database_name);
 	else:
 		database_name = config.get_option("database")
-
+		
+	cursor.execute("CREATE DATABASE IF NOT EXISTS %s", database_name);
 	print database_name
 	cursor.execute("use %s" % database_name) 
 	# check if all tables exists
