@@ -7,39 +7,39 @@ if __name__ == '__main__':
 								 user=config.get_option("username"),
 								 passwd=config.get_option("password"))
 	cursor = connection.cursor()
+	database_name = ""
 	if config.get_option("database") is None:
 		database_name = config.get_option("username") + "_irc"
 	else:
 		database_name = config.get_option("database")
 		
-	cursor.execute("CREATE DATABASE IF NOT EXISTS %s", database_name);
-	print database_name
+	#cursor.execute("CREATE DATABASE IF NOT EXISTS %s" % database_name);
 	cursor.execute("use %s" % database_name) 
 	# check if all tables exists
-	cursor.execute("""CREATE TABLE IF NOT EXISTS `users` (
-  					  `id` int(15) NOT NULL AUTO_INCREMENT,
-  					  `username` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-  					  `last_seen` datetime NULL,
-  					  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  					  PRIMARY KEY (`id`)
-					) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 """)
-	cursor.execute("""CREATE TABLE IF NOT EXISTS `message` (
-					  `id` int(25) NOT NULL AUTO_INCREMENT,
-					  `content` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
-					  `user_id` int(15) NOT NULL,
-					  PRIMARY KEY (`id`)
-					) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;""")
-	cursor.execute("""CREATE TABLE IF NOT EXISTS `link` (
-					  `id` int(25) NOT NULL AUTO_INCREMENT,
-					  `content` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
-					  `message_id` int(25) NOT NULL,
-					  `type` enum('picture','normal', 'youtube') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'normal',
-					  `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-					  PRIMARY KEY (`id`)
-					) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;""")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS `irc_users` (
+				    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+				    `username` varchar(100) NOT NULL,
+				    `last_seen` TIMESTAMP NULL,
+				    `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+					)""")
+
+	cursor.execute("""CREATE TABLE IF NOT EXISTS `irc_message` (
+				    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+				    `content` varchar(512) NOT NULL,
+				    `user_id` integer NOT NULL,
+				    `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+				    INDEX `irc_message_user` (`user_id`),
+				    INDEX `irc_message_created` (`created`),
+				    CONSTRAINT `user_id_refs_id_61cb1a8b` FOREIGN KEY (`user_id`) REFERENCES `irc_users` (`id`)
+					)""")
+	cursor.execute("""CREATE TABLE IF NOT EXISTS `irc_link` (
+				    `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY,
+				    `content` varchar(512) NOT NULL,
+				    `message_id` integer NOT NULL,
+				    `type` varchar(50) NOT NULL,
+				    INDEX `irc_link_message` (`message_id`),
+				    INDEX `irc_link_type` (`type`),
+				    CONSTRAINT `message_id_refs_id_12db337f` FOREIGN KEY (`message_id`) REFERENCES `irc_message` (`id`)
+					)""")
+
 	print "database created"
-
-
-
-
-	

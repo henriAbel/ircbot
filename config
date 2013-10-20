@@ -5,9 +5,9 @@ password: salajane
 database: irc_irc
 
 [irc]
-server: someserver.eu
-channel: #channel
-channel_password: password
+server: irc.kzfv.eu
+channel: asfalt
+channel_password: 
 port: 6667
-log_file: log.txt3
+log_file: log.txt
 ssl: true

@@ -7,5 +7,7 @@ fi
 
 apt-get -y install python-twisted
 apt-get -y install python-mysqldb
+apt-get -y install python-pip
+pip install Django==1.5.4
 
 python ./database_creator.py
