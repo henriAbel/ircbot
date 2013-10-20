@@ -1,0 +1,13 @@
+[sql]
+host: localhost
+username: irc
+password: salajane
+database: irc_irc
+
+[irc]
+server: irc.kzfv.eu
+channel: asfalt
+channel_password: 
+port: 6667
+log_file: log.txt
+ssl: true
