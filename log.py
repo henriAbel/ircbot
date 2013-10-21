@@ -1,23 +1,16 @@
-# Copyright (c) Twisted Matrix Laboratories.
-# See LICENSE for details.
-
-
-
-# twisted imports
 from twisted.internet import reactor, protocol, ssl
-
-# another imports
 from configuration import Config
 from message_handler import MessageHandler
 
-class MessageHandlerFactory(protocol.ClientFactory):
+class ClientFactory(protocol.ClientFactory):
     def __init__(self, channel, filename, channel_password = ""):
         self.channel = "%s %s" % (channel, channel_password)
         self.filename = filename
 
     def buildProtocol(self, addr):
         mhandler = MessageHandler()
-        mhandler.nickname = "bot"
+        mhandler.nickname = self._nickname
+        mhandler.password = self._password
         mhandler.factory = self
         return mhandler
 
@@ -30,7 +23,14 @@ class MessageHandlerFactory(protocol.ClientFactory):
 
 if __name__ == '__main__':
     config = Config("config")
-    factory = MessageHandlerFactory(config.get_option("channel"), config.get_option("log_file"), config.get_option("channel_password"))
+    factory = ClientFactory(config.get_option("channel"), config.get_option("log_file"), config.get_option("channel_password"))
+    bot_name = config.get_option("bot_name")
+    if bot_name is not None:
+        factory._nickname = bot_name
+    else:
+        factory._nickname = "bot"
+
+    factory._password = config.get_option("server_password")
 
     if config.get_option("ssl") == "true":
         reactor.connectSSL(config.get_option("server"), int(config.get_option("port")), factory, ssl.ClientContextFactory())

@@ -33,4 +33,3 @@ class Link(models.Model):
 	
 	def youtubelink(self):
 		return self.content.replace("watch?v=", "embed/")
-

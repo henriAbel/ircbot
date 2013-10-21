@@ -1,7 +1,7 @@
 from twisted.words.protocols import irc
 from logger import FileLogger, SqlLogger
 from xml.dom import minidom
-import time, re, urllib, urllib2
+import time, re, urllib2, urlparse
 
 
 class MessageHandler(irc.IRCClient):  
@@ -20,6 +20,11 @@ class MessageHandler(irc.IRCClient):
     def signedOn(self):
         self.join(self.factory.channel)
 
+    # Converts string to unicode(utf-8) and sends to channel
+    def say_decoded(self, channel, message):
+        unicoded = message.encode(encoding='utf8')
+        self.say(channel, unicoded)
+
     def privmsg(self, user, channel, msg):
         # Log every message once
         #if not self.sqllogger.message_exists(msg):
@@ -32,19 +37,17 @@ class MessageHandler(irc.IRCClient):
             type = "normal"
             if any(url.endswith(s) for s in (".jpg", ".jpeg", ".gif", ".png")):
                 type = "picture"
-            elif url.find("youtube.com/watch?v=") != -1:
+            elif url.find("youtube.com/watch") != -1:
                 type = "youtube"
 
             self.sqllogger.log_url(url, id, type)
 
             if type == "youtube":
-                videoid = url.split("youtube.com/watch?v=")[1]
-                xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % videoid) 
+                url_data = urlparse.urlparse(url)
+                query = urlparse.parse_qs(url_data.query)
+                xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % query["v"][0]) 
                 xmldoc = minidom.parse(xml)
-                videotitle = xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue
-                unicoded = videotitle.encode(encoding='utf8')
-                self.logger.log_message(unicoded)
-                self.say(channel, unicoded)
+                self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
 
     def irc_NICK(self, prefix, params):
         self.sqllogger.log_nickchange(prefix.split('!')[0], params[0])
