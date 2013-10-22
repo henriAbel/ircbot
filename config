@@ -5,9 +5,12 @@ password: salajane
 database: irc_irc
 
 [irc]
-server: irc.kzfv.eu
-channel: asfalt
-channel_password: 
+server: server.adress
+#server_password: password
+channel: #channel
+#channel_password: password
+# If not defined, bot will be used
+#bot_name: bot
 port: 6667
 log_file: log.txt
-ssl: true
+ssl: false
