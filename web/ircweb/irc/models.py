@@ -26,10 +26,13 @@ class Message(models.Model):
 			self.created = datetime.date.today()
 		super(Message, self).save()
 
+	class Meta:
+		get_latest_by = "created"
+
 class Link(models.Model):
 	content = models.CharField(max_length=512)
 	message = models.ForeignKey(Message)
 	type = models.CharField(max_length=50)
 	
 	def youtubelink(self):
-		return self.content.replace("watch?v=", "embed/")
+		return "http://www.youtube.com/embed/%s" % self.content		

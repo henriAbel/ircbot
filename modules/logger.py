@@ -1,10 +1,10 @@
-from modules.databaselayer import DatabaseLayer
-from modules.databseconnector import DatabaseConnector
+from databaselayer import DatabaseLayer
+from databaseconnector import DatabaseConnector
 import time
 
 class FileLogger:
     def __init__(self, file):
-        self.file = "logs/%s" % file
+        self.file = file
 
     def log_message(self, message):
         timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))

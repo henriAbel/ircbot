@@ -5,9 +5,6 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-apt-get -y install python-twisted
-apt-get -y install python-mysqldb
-apt-get -y install python-pip
-pip install Django==1.5.4
+apt-get -y install python-pip python-flup python-mysqldb python-twisted
 
-python ./database_creator.py
+pip install Django==1.5.4
