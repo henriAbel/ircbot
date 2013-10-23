@@ -37,7 +37,7 @@ class MessageHandler(irc.IRCClient):
                 type = "normal"
                 if any(url.endswith(s) for s in (".jpg", ".jpeg", ".png")):
                     type = "picture"
-                elif if url.endswith(".gif"):
+                elif url.endswith(".gif"):
                     type = "gif"
                 elif url.find("youtube.com/watch") != -1:
                     type = "youtube"
