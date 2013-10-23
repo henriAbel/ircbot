@@ -35,8 +35,10 @@ class MessageHandler(irc.IRCClient):
             for url in urls:
                 id = self.sqllogger.log_message(msg, user)
                 type = "normal"
-                if any(url.endswith(s) for s in (".jpg", ".jpeg", ".gif", ".png")):
+                if any(url.endswith(s) for s in (".jpg", ".jpeg", ".png")):
                     type = "picture"
+                elif if url.endswith(".gif"):
+                    type = "gif"
                 elif url.find("youtube.com/watch") != -1:
                     type = "youtube"
                     url_data = urlparse.urlparse(url)

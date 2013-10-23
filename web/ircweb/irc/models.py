@@ -5,6 +5,7 @@ class Linktype():
 	NORMAL = "normal"
 	PICTURE = "picture"
 	YOUTUBE = "youtube"
+	GIF = "gif"
 
 class Users(models.Model):
 	username = models.CharField(max_length=100)

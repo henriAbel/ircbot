@@ -1,3 +1,19 @@
 body {
 	background-color: black;
 }
+
+.youtubeLink {
+	width: 480px;
+	height: 360px;
+	cursor: pointer;
+}
+
+.youtubeIcon {
+	background-image: url('/static/irc/images/film.png');
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	width: 480px;
+	height: 360px;
+	position: absolute;
+}
+
