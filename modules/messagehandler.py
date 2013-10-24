@@ -30,10 +30,10 @@ class MessageHandler(irc.IRCClient):
         if not self.sqllogger.message_exists(msg):
             user = user.split('!', 1)[0]
             self.logger.log_message("<%s> %s" % (user, msg)) 
+            id = self.sqllogger.log_message(msg, user)
 
             urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
             for url in urls:
-                id = self.sqllogger.log_message(msg, user)
                 type = "normal"
                 if any(url.endswith(s) for s in (".jpg", ".jpeg", ".png")):
                     type = "picture"
@@ -46,14 +46,23 @@ class MessageHandler(irc.IRCClient):
                     url = query["v"][0]
 
                 self.sqllogger.log_url(url, id, type)
-
-                if type == "youtube":
-                    xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url) 
-                    xmldoc = minidom.parse(xml)
-                    self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
+                try:
+                    if type == "youtube":
+                        xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url) 
+                        xmldoc = minidom.parse(xml)
+                        self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
+                except urllib2.HTTPError, e:
+                    self.logger.log_message("Something went wrong while resolving youtube link %s", e)
+                except Exception:
+                    import traceback
+                    self.logger.log_message("Fatal error! If you see this, please post following message to the github issuse resolver");
+                    self.logger.log_message(traceback.format_exc())
 
     def irc_NICK(self, prefix, params):
-        self.sqllogger.log_nickchange(prefix.split('!')[0], params[0])
+        before = prefix.split('!')[0]
+        now = params[0]
+        self.logger.log_message("%s changed nick to %s" % (before, now))
+        #self.sqllogger.log_nickchange(befor, now)
 
     def lineReceived(self, line):
         irc.IRCClient.lineReceived(self, line)

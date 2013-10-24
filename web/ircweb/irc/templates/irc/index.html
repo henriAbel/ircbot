@@ -1,31 +1,34 @@
 {% extends "irc/base.html" %}
 {% block content %}
+{% load content_handler %}
 
-{% if links %}
-    {% for link in links %}
-		<p>{{ link.content }}<p>
-    {% endfor %}
-{% endif %}
-
-{% if picture %}
-	{% for link in picture%}
-		<img src="{{ link.content }}" />
-	{% endfor %}
-{% endif %}
-
-{% if youtube %}
-	{% for link in youtube%}
-		<div data-url="{{link.youtubelink}}" class="youtubeLink">
-			<div class="youtubeIcon"></div>
-			<img src="http://img.youtube.com/vi/{{link.content}}/0.jpg"/>
-		</div>
-	{% endfor %}
-{% endif %}
-
-{% if gif %}
-    {% for link in gif %}
-		<span>{{ link.content }}<span>
-    {% endfor %}
-{% endif %}
+<div>
+	{% if links %}
+	    {% for link in links %}
+			{% url link %}
+	    {% endfor %}
+	{% endif %}
+</div>
+<div>
+	{% if picture %}
+		{% for link in picture %}
+			{% photo link %}
+		{% endfor %}
+	{% endif %}
+</div>
+<div>
+	{% if youtube %}
+		{% for link in youtube %}
+			{% youtube link%}
+		{% endfor %}
+	{% endif %}
+</div>
+<div>
+	{% if gif %}
+	    {% for link in gif %}
+			{% gif link %}
+	    {% endfor %}
+	{% endif %}
+</div>
 
 {% endblock %}

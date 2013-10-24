@@ -1,5 +1,5 @@
 from configuration import Config
-import MySQLdb
+import MySQLdb, time
 
 class DatabaseConnector():
 	def __init__(self):
@@ -19,15 +19,14 @@ class DatabaseConnector():
 
 	def make_query(self, query, param):
 		try:
-			self.cursor = self.connection.cursor()
 			self.loop_counter = 0
 			self.cursor.execute(query, param)
 			self.connection.commit()
-			self.cursor.close()
 			return self.cursor.lastrowid
 		except MySQLdb.OperationalError, message:
 			# If after 5 reconnect connection could not be restored, give up
 			if self.loop_counter < 5:
+				time.sleep(1)
 				self.connect_database();
 				self.loop_counter += 1
-				self.make_query(query, param)	
+				self.make_query(query, param)
