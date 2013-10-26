@@ -1,19 +1,127 @@
-body {
-	background-color: black;
+@import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
+
+@font-face {
+	font-family: 'fontawesome';
+	src:url('../fonts/fontawesome.eot');
+	src:url('../fonts/fontawesome.eot?#iefix') format('embedded-opentype'),
+		url('../fonts/fontawesome.svg#fontawesome') format('svg'),
+		url('../fonts/fontawesome.woff') format('woff'),
+		url('../fonts/fontawesome.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
 }
 
-.youtubeLink {
-	width: 480px;
-	height: 360px;
+body {
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+    color: #47a3da;
+    background-color: #EBEBEB;
+}
+
+.leftMenu {
+	width: 240px;
+	height: 100%;
+	position:fixed;
+	top: 0;
+	left: 0;
+	background-color: #47a3da;
+	-moz-box-shadow: 0 0 5px #888;
+	-webkit-box-shadow: 0 0 5px#888;
+	box-shadow: 0 0 5px #888;
+}
+
+h3 {
+	color: #afdefa;
+	font-size: 1.9em;
+	padding: 20px;
+	margin: 0;
+	font-weight: 300;
+	background: #0d77b6;
+}
+
+.menuItems {
+
+}
+
+.menuItems a {
+	display: block;
+	color: #fff;
+	font-size: 1.1em;
+	font-weight: 300;
+	border-bottom: 1px solid #258ecd;
+	padding: 1em;
+	text-decoration: none;
+}
+
+.menuItems a:hover {
+	background: #258ecd;
+}
+
+.menuItems a:active {
+	background: #afdefa;
+	color: #47a3da;
+}
+
+.content {
+	margin-left: 260px;
+	margin-top: 30px;
+}
+
+.links {
+	border-radius: 4px;
+	padding: 7px;
+	border: 1px solid #CCC;
+	background-color: #FAFAFA;
+	width: 80%;
+	color: #285A88;
+	display: block;
+	margin-bottom: 5px;
+	text-decoration: none;
+}
+
+.links:hover {
+	background-color: #0d77b6;
+	border: 1px solid #0d77b6;
+	color: white;
 	cursor: pointer;
 }
 
-.youtubeIcon {
-	background-image: url('/static/irc/images/film.png');
-	background-position: 50% 50%;
-	background-repeat: no-repeat;
-	width: 480px;
-	height: 360px;
-	position: absolute;
+.img-thumb {
+	max-width: 200px;
+	max-height: 100px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	padding: 1px;
+	border: 1px solid #CCC;
+	background-color: #FAFAFA;
 }
 
+.img-thumb:hover {
+	opacity: 0.7;
+}
+
+#irc {
+	bottom: 0;
+	border-bottom: none;
+	position:fixed;
+	background-color: #0d77b6;
+	margin-bottom: 20px;
+	width: 205px;
+}
+
+.youtubeLink {
+        width: 480px;
+        height: 360px;
+        cursor: pointer;
+        display: inline-block;
+		margin-right: 10px;
+		margin-bottom: 10px;
+}
+
+.youtubeIcon {
+        background-image: url('/static/irc/images/film.png');
+        background-position: 50% 50%;
+        background-repeat: no-repeat;
+        width: 480px;
+        height: 360px;
+        position: absolute;
+}

@@ -3,32 +3,43 @@
 {% load content_handler %}
 
 <div>
-	{% if links %}
-	    {% for link in links %}
-			{% url link %}
-	    {% endfor %}
-	{% endif %}
+        {% if picture %}
+                {% for link in picture %}
+                        {% photo link %}
+                {% endfor %}
+        {% endif %}
 </div>
+
 <div>
-	{% if picture %}
-		{% for link in picture %}
-			{% photo link %}
-		{% endfor %}
-	{% endif %}
+        {% if gif %}
+            {% for link in gif %}
+                        {% gif link %}
+            {% endfor %}
+        {% endif %}
 </div>
+
 <div>
-	{% if youtube %}
-		{% for link in youtube %}
-			{% youtube link%}
-		{% endfor %}
-	{% endif %}
+        {% if youtube %}
+                {% for link in youtube %}
+                        {% youtube link%}
+                {% endfor %}
+        {% endif %}
 </div>
+
 <div>
-	{% if gif %}
-	    {% for link in gif %}
-			{% gif link %}
-	    {% endfor %}
-	{% endif %}
+        {% if links %}
+            {% for link in links %}
+                        {% url link %}
+            {% endfor %}
+        {% endif %}
+</div>
+
+<div>
+	Coming, maybe
+</div>
+
+<div>
+	Coming
 </div>
 
 {% endblock %}
