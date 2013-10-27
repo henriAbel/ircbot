@@ -1,3 +1,6 @@
 *.py[cod]
 irc.sublime-project
 irc.sublime-workspace
+config
+settings.py
+logs/log.txt

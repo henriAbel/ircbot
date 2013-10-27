@@ -1,28 +1,32 @@
 {% extends "irc/base.html" %}
 {% load content_handler %}
 {% block content %}
-<div>
-	{% if link %}
-		{% url link %}
-	{% endif %}
-</div>
-<div>
-	{% if picture %}
-		{% photo picture %}
-	{% endif %}
-</div>
-<div>
-	{% if youtube %}
-		{% youtube youtube%}
-	{% endif %}
-</div>
-<div>
-	{% if gif %}
-		{% gif gif %}
-	{% endif %}
-</div>
 
+{% if link %}
+	<div>
+		{% url link %}
+	</div>
+{% endif %}
+
+{% if picture %}
+	<div>
+		{% photo picture %}
+	</div>
+{% endif %}
+
+{% if youtube %}
+	<div>
+		{% youtube youtube%}
+	</div>
+{% endif %}
+
+{% if gif %}
+	<div>
+		{% gif gif %}
+	</div>
+{% endif %}
 {% endblock %}
+
 {% spaceless %}
 	{% block page %}
 		{% page total current category%}
