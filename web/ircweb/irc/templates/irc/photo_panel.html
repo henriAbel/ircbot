@@ -1,1 +1,5 @@
-<img src="{{link.content}}" />
+{% spaceless %}
+	{% for link in links %}
+		<img src="{{link.content}}" />
+	{% endfor %}
+{% endspaceless %}

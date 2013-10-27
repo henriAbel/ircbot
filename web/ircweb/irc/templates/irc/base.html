@@ -1,6 +1,6 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
-{% load staticfiles %}
 <head>
     <link rel="stylesheet" href="{% static "irc/style.css" %}" />
     <script src="{% static "irc/js/jquery.js" %}"></script>
@@ -10,9 +10,12 @@
 
 <body>
     <div id="content">
-    {% spaceless %}
-        {% block content %}{% endblock %}
-    {% endspaceless  %}
+	    {% spaceless %}
+	        {% block content %}{% endblock %}
+	    {% endspaceless  %}
+    </div>
+    <div>
+    	{% block page %}{% endblock %}
     </div>
 </body>
 </html>

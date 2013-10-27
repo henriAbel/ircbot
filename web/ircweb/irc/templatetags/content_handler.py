@@ -4,17 +4,26 @@ from irc.models import Link
 register = template.Library()
 
 @register.inclusion_tag('irc/youtube_panel.html', takes_context=True)
-def youtube(context, link):
-	return {"link": link}
+def youtube(context, links):
+	return {"links": links}
 
 @register.inclusion_tag('irc/gif_panel.html', takes_context=True)
-def gif(context, link):
-	return {"link": link}
+def gif(context, links):
+	return {"links": links}
 
 @register.inclusion_tag('irc/photo_panel.html', takes_context=True)
-def photo(context, link):
-	return {"link": link}
+def photo(context, links):
+	return {"links": links}
 
 @register.inclusion_tag('irc/link_panel.html', takes_context=True)
-def url(context, link):
-	return {"link": link}
+def url(context, links):
+	return {"links": links}
+
+@register.inclusion_tag('irc/page_panel.html', takes_context=True)
+def page(context, total, current, category):
+	print total
+	return {
+	"total": range(1,int(total) + 1), 
+	"current": int(current),
+	"category": category
+	}

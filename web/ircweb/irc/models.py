@@ -2,7 +2,7 @@ from django.db import models
 from datetime import datetime
 
 class Linktype():
-	NORMAL = "normal"
+	NORMAL = "link"
 	PICTURE = "picture"
 	YOUTUBE = "youtube"
 	GIF = "gif"

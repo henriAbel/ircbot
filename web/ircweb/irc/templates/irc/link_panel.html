@@ -1,1 +1,3 @@
-<a href="{{link.content}}"><p>{{ link.content }}</p></a>
+{% for link in links %}
+	<a href="{{link.content}}" target="_blank"><p>{{ link.content }}</p></a>
+{% endfor %}
