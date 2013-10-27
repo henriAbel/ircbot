@@ -52,4 +52,10 @@ def check_database():
 	if cursor.rowcount == 0:
 		cursor.execute("UPDATE irc_link SET content = REPLACE(content, 'http://www.youtube.com/watch?v=', '') WHERE type = 'youtube'");
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.1)")
-		connection.commit()
+		connection.commit()	
+	else:
+		row = cursor.fetchone()
+		if float(row[0]) == float(0.1):
+			cursor.execute("UPDATE irc_link SET type = 'link' WHERE type = 'normal'")
+			cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.2)")
+			connection.commit()

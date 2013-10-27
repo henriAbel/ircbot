@@ -1,1 +1,5 @@
-<a href="{{ link.content }}" data-lightbox="gifs"><img class="img-thumb" src="{{ link.content }}"></a>
+{% spaceless %}	
+	{% for link in links %}
+		<a href="{{ link.content }}" data-lightbox="gifs"><img class="img-thumb" src="{{ link.content }}"></a>
+	{% endfor %}
+{% endspaceless %}
