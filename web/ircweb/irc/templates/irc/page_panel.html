@@ -1,3 +1,5 @@
-{% for i in total %}
-	<a href='{% url "tpye_with_link" category i %}'>{{i}}</a>
-{% endfor %}
+{% spaceless %}
+	{% for i in total %}
+		<a{% if current == i %} class="current-page" {% endif %} href='{% url "tpye_with_link" category i %}'>{{i}}</a>
+	{% endfor %}
+{% endspaceless %}

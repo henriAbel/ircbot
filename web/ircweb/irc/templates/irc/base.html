@@ -24,12 +24,14 @@
 	    </nav>
 	</div>
     <div class="content">
-	    {% spaceless %}
-	        {% block content %}{% endblock %}
-	    {% endspaceless  %}
-    </div>
-    <div>
-    	{% block page %}{% endblock %}
+    	<div class="slides">
+		    {% spaceless %}
+		        {% block content %}{% endblock %}
+		    {% endspaceless  %}
+	    </div>
+	    <div class="pageing">
+    		{% block page %}{% endblock %}
+    	</div>
     </div>
 </body>
 </html>
