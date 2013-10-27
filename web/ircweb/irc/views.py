@@ -5,7 +5,7 @@ import json, math
 
 ITEM_IN_PAGE = 15
 
-def index(request, category = Linktype.NORMAL, page = 1):
+def index(request, category = Linktype.NORMAL.db, page = 1):
 	links = []
 	youtube = []
 	picture = []
@@ -26,11 +26,11 @@ def ajax(request, category, page = 1):
 	if request.POST.get("ajax") is None:
 		return index(request)
 
-	if category == Linktype.GIF:
+	if category == Linktype.GIF.db:
 		template_file = "gif_panel"
-	elif category == Linktype.PICTURE:
+	elif category == Linktype.PICTURE.db:
 		template_file = "photo_panel"
-	elif category == Linktype.YOUTUBE:
+	elif category == Linktype.YOUTUBE.db:
 		template_file = "youtube_panel"
 	else:
 		template_file = "link_panel"
