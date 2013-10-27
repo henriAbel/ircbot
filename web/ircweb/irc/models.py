@@ -1,11 +1,12 @@
 from django.db import models
 from datetime import datetime
+from linkwrapper import Linkwrapper
 
 class Linktype():
-	NORMAL = "link"
-	PICTURE = "picture"
-	YOUTUBE = "youtube"
-	GIF = "gif"
+	NORMAL = Linkwrapper("link", "Links")
+	PICTURE = Linkwrapper("picture", "Pictures")
+	YOUTUBE = Linkwrapper("youtube", "Youtube")
+	GIF = Linkwrapper("gif", "Gifs")
 
 class Users(models.Model):
 	username = models.CharField(max_length=100)

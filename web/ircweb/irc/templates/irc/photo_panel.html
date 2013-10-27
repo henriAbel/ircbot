@@ -1,5 +1,4 @@
-{% spaceless %}
-	{% for link in links %}
-		<a href="{{ link.content }}" data-lightbox="pics"><img class="img-thumb" src="{{ link.content }}"></a>
-	{% endfor %}
-{% endspaceless %}
+{% for link in links %}
+	<a href="{{ link.content }}" data-lightbox="pics"><img class="img-thumb" src="{{ link.content }}"></a>
+{% endfor %}
+<input type="hidden" calss="category" value="{{category}}" />

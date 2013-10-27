@@ -1,5 +1,5 @@
 from django import template
-from irc.models import Link
+from irc.models import Link, Linktype
 
 register = template.Library()
 
@@ -27,3 +27,8 @@ def page(context, total, current, category):
 	"current": int(current),
 	"category": category
 	}
+
+@register.inclusion_tag('irc/menu_panel.html', takes_context=True)
+def menu(context):
+	menus = [Linktype.NORMAL, Linktype.YOUTUBE, Linktype.GIF, Linktype.PICTURE]
+	return {"menus": menus}
