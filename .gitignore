@@ -2,5 +2,5 @@
 irc.sublime-project
 irc.sublime-workspace
 config
-settings.py
-log.txt
+web/ircweb/ircweb/settings.py
+logs/log.txt
