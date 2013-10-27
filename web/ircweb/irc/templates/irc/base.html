@@ -1,16 +1,32 @@
-<<<<<<< HEAD
-{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
+{% load staticfiles %}
 <head>
-    <link rel="stylesheet" href="{% static "irc/style.css" %}" />
-    <script src="{% static "irc/js/jquery.js" %}"></script>
-    <script src="{% static "irc/js/main.js" %}"></script>
-    <title>{% block title %}IRC links{% endblock %}</title>
+	<link rel="stylesheet" href="{% static "irc/style.css" %}" />
+	<link rel="stylesheet" href="{% static "irc/lightbox.css" %}" />
+	<script src="{% static "irc/js/jquery.js" %}"></script>
+	<script src="{% static "irc/js/lightbox-2.6.min.js" %}"></script>
+	<script src="{% static "irc/js/main.js" %}"></script>
+	<script type="text/javascript" src="{% static "irc/js/jquery.fancybox.js" %}"></script>
+	<link rel="stylesheet" type="text/css" href="{% static "irc/jquery.fancybox.css" %}" media="screen" />
+	<script type="text/javascript" src="{% static "irc/js/jquery.fancybox-media.js" %}"></script>
+	<title>#asfalt IRC links</title>
 </head>
 
 <body>
-    <div id="content">
+
+<div class="leftMenu">
+    <nav class="menuItems">
+        <h3>Menu</h3>
+        <a href="javascript: void(1)">Pics</a>
+        <a href="javascript: void(1)">Gifs</a>
+        <a href="javascript: void(1)">Videos</a>
+        <a href="javascript: void(1)">Links</a>
+        <a href="javascript: void(1)">Statistic</a>
+        <a id="irc" href="javascript: void(1)">IRC</a>
+    </nav>
+</div>
+    <div class="content">
 	    {% spaceless %}
 	        {% block content %}{% endblock %}
 	    {% endspaceless  %}
@@ -19,69 +35,4 @@
     	{% block page %}{% endblock %}
     </div>
 </body>
-=======
-<!DOCTYPE html>
-<html lang="en">
-{% load staticfiles %}
-<head>
-    <link rel="stylesheet" href="{% static "irc/style.css" %}" />
-    <link rel="stylesheet" href="{% static "irc/lightbox.css" %}" />
-    <script src="{% static "irc/js/jquery.js" %}"></script>
-    <script src="{% static "irc/js/lightbox-2.6.min.js" %}"></script>
-    <script src="{% static "irc/js/main.js" %}"></script>
-	<script type="text/javascript" src="{% static "irc/js/jquery.fancybox.js" %}"></script>
-	<link rel="stylesheet" type="text/css" href="{% static "irc/jquery.fancybox.css" %}" media="screen" />
-	<script type="text/javascript" src="{% static "irc/js/jquery.fancybox-media.js" %}"></script>
-    <title>{% block title %}#asfalt IRC links{% endblock %}</title>
-
-  <style type="text/css">
-        .content > div {
-            display: none;
-        }
-  </style>
- 
-<script>
-$(function() {
-  $('.leftMenu a').click(function() {
-	var i = $('.menuItems > a').index(this);
-	i++
-	$('.active').hide(400).removeClass('active');
-	$('.content > div:nth-child(' + i + ')').slideDown(400).addClass('active');
-  });
-});
-</script>
-<script>
-$(document).ready(function() {
-	$('.fancybox-media').fancybox({
-		openEffect  : 'none',
-		closeEffect : 'none',
-		helpers : {
-			media : {}
-		}
-	});
-});
-</script>
-
-</head>
-
-<body>
-
-<div class="leftMenu">
-        <nav class="menuItems">
-                <h3>Menu</h3>
-                <a href="javascript: void(1)">Pics</a>
-                <a href="javascript: void(1)">Gifs</a>
-                <a href="javascript: void(1)">Videos</a>
-                <a href="javascript: void(1)">Links</a>
-                <a href="javascript: void(1)">Statistic</a>
-                <a id="irc" href="javascript: void(1)">IRC</a>
-        </nav>
-</div>
-    <div class="content">
-    {% spaceless %}
-        {% block content %}{% endblock %}
-    {% endspaceless  %}
-    </div>
-</body>
->>>>>>> 6b0832293553423b1566d11ee1198f52b3f2628b
 </html>

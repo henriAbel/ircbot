@@ -2,33 +2,34 @@
 {% load content_handler %}
 {% block content %}
 
-{% if link %}
-	<div>
-		{% url link %}
-	</div>
-{% endif %}
+	{% if link %}
+		<div>
+			{% url link %}
+		</div>
+	{% endif %}
 
-{% if picture %}
-	<div>
-		{% photo picture %}
-	</div>
-{% endif %}
+	{% if picture %}
+		<div>
+			{% photo picture %}
+		</div>
+	{% endif %}
 
-{% if youtube %}
-	<div>
-		{% youtube youtube%}
-	</div>
-{% endif %}
+	{% if youtube %}
+		<div>
+			{% youtube youtube%}
+		</div>
+	{% endif %}
 
-{% if gif %}
-	<div>
-		{% gif gif %}
-	</div>
-{% endif %}
+	{% if gif %}
+		<div>
+			{% gif gif %}
+		</div>
+	{% endif %}
+
+	{% spaceless %}
+		{% block page %}
+			{% page total current category%}
+		{% endblock %}
+	{% endspaceless %}
+
 {% endblock %}
-
-{% spaceless %}
-	{% block page %}
-		{% page total current category%}
-	{% endblock %}
-{% endspaceless %}
