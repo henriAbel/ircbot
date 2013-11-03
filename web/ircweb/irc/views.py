@@ -53,6 +53,7 @@ def ajax(request, category, page = 1):
 	resp = dict()
 	resp.update(data = template.render(context))
 	resp.update(page = template_page.render(context2))
+	print "asd"
 	return HttpResponse(json.dumps(resp), content_type="application/json")
 
 def getLinkCollection(category, page):

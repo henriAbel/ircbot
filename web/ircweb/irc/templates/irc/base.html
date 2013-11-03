@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="{% static "irc/style.css" %}" />
 	<link rel="stylesheet" href="{% static "irc/lightbox.css" %}" />
 	<link rel="stylesheet" href="{% static "irc/jquery.fancybox.css" %}" media="screen" />
-	<script src="{% static "irc/js/jquery-2.0.3.js" %}"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 	<script src="{% static "irc/js/lightbox-2.6.min.js" %}"></script>
 	<script src="{% static "irc/js/main.js" %}"></script>
 	<script src="{% static "irc/js/jquery.fancybox.js" %}"></script>
@@ -33,5 +33,6 @@
     		{% block page %}{% endblock %}
     	</div>
     </div>
+    <div id="loading"></div>
 </body>
 </html>

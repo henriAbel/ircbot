@@ -28,7 +28,6 @@ class MessageHandler(irc.IRCClient):
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
         self.logger.log_message("<%s> %s" % (user, msg)) 
-        id = self.sqllogger.log_message(msg, user)
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
@@ -44,6 +43,7 @@ class MessageHandler(irc.IRCClient):
                 url = query["v"][0]
             # Log every message once
             if not self.sqllogger.message_exists(msg):
+                id = self.sqllogger.log_message(msg, user)
                 self.sqllogger.log_url(url, id, type)
             try:
                 if type == "youtube":
