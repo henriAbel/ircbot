@@ -17,6 +17,10 @@ body {
     background-color: #EBEBEB;
 }
 
+a {
+	text-decoration: none;
+}
+
 .leftMenu {
 	width: 240px;
 	height: 100%;
@@ -72,7 +76,8 @@ h3 {
 }
 
 .content {
-	margin-left: 260px;
+	left: 260px;
+	position: absolute;
 	margin-top: 30px;
 }
 
@@ -136,7 +141,18 @@ h3 {
 	position: absolute;
 }
 
-/*
-.content > div {
-	display: none;
-}*/
+.current-page{
+	font-size: 20px;
+	text-decoration: underline;
+}
+
+.loading {
+	background-image: url('/static/irc/images/459.gif');
+	background-size: 65px 65px;
+	width: 100%;
+	height: 100%;
+	background-position: 50% 50px;
+	position: absolute;
+	background-repeat: no-repeat;
+	left: 240px;
+}

@@ -25,11 +25,10 @@
 			{% gif gif %}
 		</div>
 	{% endif %}
-
-	{% spaceless %}
-		{% block page %}
-			{% page total current category%}
-		{% endblock %}
-	{% endspaceless %}
-
 {% endblock %}
+
+{% spaceless %}
+	{% block page %}
+		{% page next prev category%}
+	{% endblock %}
+{% endspaceless %}

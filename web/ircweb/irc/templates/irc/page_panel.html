@@ -1,3 +1,9 @@
-{% for i in total %}
-	<a href='{% url "tpye_with_link" category i %}'>{{i}}</a>
-{% endfor %}
+{% spaceless %}
+	{% if prev != -1 %}
+		<a class="prev-page" href='{% url "tpye_with_link" category prev %}'>Previous</a>
+	{% endif %}
+
+	{% if next != -1 %}
+		<a class="next-page" href='{% url "tpye_with_link" category next %}'>Next</a>
+	{% endif %}
+{% endspaceless %}

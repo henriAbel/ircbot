@@ -13,19 +13,17 @@ def index(request, category = Linktype.NORMAL.db, page = 1):
 	links_collection = getLinkCollection(category, page)
 	total = Link.objects.filter(type=category).count()
 	template = loader.get_template("irc/index.html")
+	total_pages = math.ceil(total / float(ITEM_IN_PAGE))
 	context = RequestContext(request, {
     	category: links_collection,
-    	"total": math.ceil(total / float(ITEM_IN_PAGE)),
-    	"current": int(page),
+    	"next": getNextPage(total_pages, page),
+    	"prev": getPrevPage(total_pages, page),
     	"category": category
     	})
 
 	return HttpResponse(template.render(context))
 
 def ajax(request, category, page = 1):
-	if request.POST.get("ajax") is None:
-		return index(request)
-
 	if category == Linktype.GIF.db:
 		template_file = "gif_panel"
 	elif category == Linktype.PICTURE.db:
@@ -39,23 +37,25 @@ def ajax(request, category, page = 1):
 	if page < 1:
 		page = 1
 
-	total = Link.objects.filter(type=category).count()
+	limit = ITEM_IN_PAGE * page
 	# Get html from template
 	template = loader.get_template("irc/%s.html" % template_file)
 	context = RequestContext(request, {
     	"links": getLinkCollection(category, page)
     	})
+	total = Link.objects.filter(type=category).count()
+	template_page = loader.get_template("irc/page_panel.html")
+	total_pages = int(math.ceil(total / float(ITEM_IN_PAGE)))
+	
+	context2 = RequestContext(request, {
+		"category": category,
+		"next": getNextPage(total_pages, page),
+		"prev": getPrevPage(total_pages, page)
+		})
 	# Put all togheter into json object
 	resp = dict()
-	# Check if there is next page
-	if total <= limit:
-		resp.update(more = False)
-	else:
-		resp.update(more = True)
-	resp.update(total = total)
-	resp.update(current = page)
-
 	resp.update(data = template.render(context))
+	resp.update(page = template_page.render(context2))
 	return HttpResponse(json.dumps(resp), content_type="application/json")
 
 def getLinkCollection(category, page):
@@ -63,6 +63,12 @@ def getLinkCollection(category, page):
 	page = int(page)
 	offset = ITEM_IN_PAGE * (page -1)
 	limit = ITEM_IN_PAGE * page
-	return Link.objects.filter(type=category)[offset:limit]
+	return Link.objects.order_by("-id").filter(type=category)[offset:limit]
+
+def getNextPage(total, current):
+	return current + 1 if total - current > 0 else -1
+
+def getPrevPage(total, current):
+	return current - 1 if current > 1 else -1
 
 

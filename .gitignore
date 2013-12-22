@@ -2,5 +2,6 @@
 irc.sublime-project
 irc.sublime-workspace
 config
-settings.py
+logs/log.txt2
 logs/log.txt
+ircwebDatabase.db

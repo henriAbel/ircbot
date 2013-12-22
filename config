@@ -1,9 +1,3 @@
-[sql]
-host: localhost
-username: irc
-password: salajane
-database: irc_irc
-
 [irc]
 server: server.adress
 #server_password: password
