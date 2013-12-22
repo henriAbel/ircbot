@@ -5,3 +5,5 @@ config
 logs/log.txt2
 logs/log.txt
 ircwebDatabase.db
+web/ircweb/irc/static/irc/thumb/*
+web/ircweb/irc/static/irc/gif/*
