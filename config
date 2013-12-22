@@ -1,0 +1,10 @@
+[irc]
+server: server.adress
+#server_password: password
+channel: #channel
+#channel_password: password
+# If not defined, bot will be used
+#bot_name: bot
+port: 6667
+log_file: log.txt
+ssl: false
