@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from datetime import datetime
 from linkwrapper import Linkwrapper
@@ -37,4 +38,12 @@ class Link(models.Model):
 	type = models.CharField(max_length=50)
 	
 	def youtubelink(self):
-		return "http://www.youtube.com/embed/%s" % self.content		
+		return "http://www.youtube.com/embed/%s" % self.content
+
+	def thumbLink(self):
+		if self.type != Linktype.GIF.db:
+			return None
+
+		name = os.path.basename(self.content).replace("gif", "png")
+		return "/static/irc/thumb/" + name
+

@@ -1,7 +1,9 @@
 from twisted.words.protocols import irc
 from logger import FileLogger, SqlLogger
 from xml.dom import minidom
+from modules.gifextract import GifExtractor
 import time, re, urllib2, urlparse
+from multiprocessing import Process
 
 
 class MessageHandler(irc.IRCClient):  
@@ -45,6 +47,10 @@ class MessageHandler(irc.IRCClient):
             if not self.sqllogger.message_exists(msg):
                 id = self.sqllogger.log_message(msg, user)
                 self.sqllogger.log_url(url, id, type)
+                if type == "gif":
+                    # Downloading and converting takes time, so start in new process
+                    p = Process(target=GifExtractor, args=(url,))
+                    p.start()
             try:
                 if type == "youtube":
                     xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url) 

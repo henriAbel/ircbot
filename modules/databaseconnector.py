@@ -12,11 +12,16 @@ class DatabaseConnector():
 		self.connection.text_factory = str
 		self.cursor = self.connection.cursor()
 
-	def make_query(self, query, param):
+	def make_query(self, query, param, close = True):
 		self.connect_database()
-		self.cursor.execute(query, param)
-		if not query.startswith("select"):
+		result = self.cursor.execute(query, param)
+		if not query.startswith("SELECT"):
 			self.connection.commit()
-		self.connection.close()
 
-		return self.cursor.lastrowid
+		if close:
+			self.connection.close()
+
+		return result
+
+	def close(self):
+		self.connection.close()
