@@ -17,7 +17,8 @@ $(function() {
   	$('body').on('click', '.pageing > a, .menu_item', function(e) {
 		e.preventDefault();
 		var href = $(this).attr("href");
-		history.pushState({}, '', href);
+		if ($(e.target).hasClass('menu_item'))
+			history.pushState({}, '', href);
 
 		loadPage(href + "ajax");
 		return false;

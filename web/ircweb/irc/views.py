@@ -3,7 +3,7 @@ from django.template import RequestContext, loader
 from irc.models import Users, Link, Message, Linktype
 import json, math
 
-ITEM_IN_PAGE = 15
+ITEM_IN_PAGE = 5
 
 def index(request, category = Linktype.NORMAL.db, page = 1):
 	links = []
@@ -13,10 +13,11 @@ def index(request, category = Linktype.NORMAL.db, page = 1):
 	links_collection = getLinkCollection(category, page)
 	total = Link.objects.filter(type=category).count()
 	template = loader.get_template("irc/index.html")
+	total_pages = math.ceil(total / float(ITEM_IN_PAGE))
 	context = RequestContext(request, {
     	category: links_collection,
-    	"total": math.ceil(total / float(ITEM_IN_PAGE)),
-    	"current": int(page),
+    	"next": getNextPage(total_pages, page),
+    	"prev": getPrevPage(total_pages, page),
     	"category": category
     	})
 
@@ -44,16 +45,17 @@ def ajax(request, category, page = 1):
     	})
 	total = Link.objects.filter(type=category).count()
 	template_page = loader.get_template("irc/page_panel.html")
+	total_pages = int(math.ceil(total / float(ITEM_IN_PAGE)))
+	
 	context2 = RequestContext(request, {
-		"total": range(1,int(math.ceil(total / float(ITEM_IN_PAGE))) + 1),
 		"category": category,
-		"current": page
+		"next": getNextPage(total_pages, page),
+		"prev": getPrevPage(total_pages, page)
 		})
 	# Put all togheter into json object
 	resp = dict()
 	resp.update(data = template.render(context))
 	resp.update(page = template_page.render(context2))
-	print "asd"
 	return HttpResponse(json.dumps(resp), content_type="application/json")
 
 def getLinkCollection(category, page):
@@ -62,5 +64,11 @@ def getLinkCollection(category, page):
 	offset = ITEM_IN_PAGE * (page -1)
 	limit = ITEM_IN_PAGE * page
 	return Link.objects.order_by("-id").filter(type=category)[offset:limit]
+
+def getNextPage(total, current):
+	return current + 1 if total - current > 0 else -1
+
+def getPrevPage(total, current):
+	return current - 1 if current > 1 else -1
 
 

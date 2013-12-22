@@ -20,13 +20,12 @@ def url(context, links):
 	return {"links": links}
 
 @register.inclusion_tag('irc/page_panel.html', takes_context=True)
-def page(context, total, current, category):
-	print total
+def page(context, next, prev, category):
 	return {
-	"total": range(1,int(total) + 1), 
-	"current": int(current),
-	"category": category
-	}
+        "next": next, 
+        "prev": prev,
+        "category": category
+    }
 
 @register.inclusion_tag('irc/menu_panel.html', takes_context=True)
 def menu(context):
