@@ -3,7 +3,7 @@ from django.template import RequestContext, loader
 from irc.models import Users, Link, Message, Linktype
 import json, math
 
-ITEM_IN_PAGE = 5
+ITEM_IN_PAGE = 15
 
 def index(request, category = Linktype.NORMAL.db, page = 1):
 	links = []

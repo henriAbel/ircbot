@@ -4,6 +4,7 @@ from configuration import Config
 def check_database():
 	config = Config("config")
 	database = DatabaseConnector()
+	database.connect_database()
 	cursor = database.cursor
 	connection = database.connection
 			
@@ -40,6 +41,8 @@ def check_database():
 	cursor.execute("CREATE INDEX IF NOT EXISTS `irc_message_created_index` ON `irc_message` (`created`);")
 	cursor.execute("CREATE INDEX IF NOT EXISTS `irc_link_message_index` ON `irc_link` (`message_id`);")
 	cursor.execute("CREATE INDEX IF NOT EXISTS `irc_link_type_index` ON `irc_link` (`type`);")
+	connection.commit()
+	connection.close()
 	
 	# Simple versioning
 	'''

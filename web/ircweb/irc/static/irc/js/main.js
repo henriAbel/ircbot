@@ -18,7 +18,7 @@ $(function() {
 		e.preventDefault();
 		var href = $(this).attr("href");
 		if ($(e.target).hasClass('menu_item'))
-			history.pushState({}, '', href);
+			history.pushState({}, '', href.substring(0, href.length - 2));
 
 		loadPage(href + "ajax");
 		return false;
