@@ -9,15 +9,13 @@ from multiprocessing import Process
 class MessageHandler(irc.IRCClient):  
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
-        self.logger = FileLogger(open(self.factory.filename, "a"))
+        self.logger = FileLogger().log
         self.sqllogger = SqlLogger()
+        self.logger.info("Connected to %s" % self.factory.channel)
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
-        self.logger.log_message("[disconnected at %s]" % 
-                        time.asctime(time.localtime(time.time())))
-        self.logger.close()
-
+        self.logger.info("disconnected from %s" % self.factory.channel)
 
     def signedOn(self):
         self.join(self.factory.channel)
@@ -29,7 +27,7 @@ class MessageHandler(irc.IRCClient):
 
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
-        self.logger.log_message("<%s> %s" % (user, msg)) 
+        self.logger.info("<%s> %s" % (user, msg)) 
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
@@ -57,18 +55,18 @@ class MessageHandler(irc.IRCClient):
                     xmldoc = minidom.parse(xml)
                     self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
             except urllib2.HTTPError, e:
-                self.logger.log_message("Something went wrong while resolving youtube link %s", e)
+                self.logger.info("Something went wrong while resolving youtube link %s", e)
             except Exception:
                 import traceback
-                self.logger.log_message("Fatal error! If you see this, please post following message to the github issuse resolver");
-                self.logger.log_message(traceback.format_exc())
+                self.logger.info("Fatal error! If you see this, please post following message to the github issuse resolver");
+                self.logger.info(traceback.format_exc())
 
     def irc_NICK(self, prefix, params):
         before = prefix.split('!')[0]
         now = params[0]
-        self.logger.log_message("%s changed nick to %s" % (before, now))
+        self.logger.info("%s changed nick to %s" % (before, now))
         #self.sqllogger.log_nickchange(befor, now)
 
     def lineReceived(self, line):
         irc.IRCClient.lineReceived(self, line)
-        #self.logger.log_message(line)
+        #self.logger.info(line)
