@@ -1,6 +1,7 @@
 from twisted.internet import reactor, protocol, ssl
 from modules.configuration import Config
 from modules.messagehandler import MessageHandler
+from modules.timer import Timer
 import modules.databasemanager
 
 

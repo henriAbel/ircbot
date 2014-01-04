@@ -1,18 +1,14 @@
 from databaselayer import DatabaseLayer
 from databaseconnector import DatabaseConnector
+from modules.configuration import Config
 import time
+import logging
 
 class FileLogger:
-    def __init__(self, file):
-        self.file = file
-
-    def log_message(self, message):
-        timestamp = time.strftime("[%H:%M:%S]", time.localtime(time.time()))
-        self.file.write('%s %s\n' % (timestamp, message))
-        self.file.flush()
-
-    def close(self):
-        self.file.close()
+    def __init__(self):
+        config = Config("config")
+        logging.basicConfig(filename="logs/" + config.get_option("log_file"), level=20, format='%(asctime)s %(levelname)-8s %(message)s')
+        self.log = logging.getLogger("")
 
 class SqlLogger:
     def __init__(self):

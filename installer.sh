@@ -8,3 +8,4 @@ fi
 apt-get -y install python-pip python-flup python-mysqldb python-twisted python-imaging
 
 pip install Django==1.5.4
+pip install apscheduler
