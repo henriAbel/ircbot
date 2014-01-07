@@ -1,5 +1,5 @@
 <ul>
 	{% for menu in menus %}
-		<li><a class="menu_item" href="{% url 'tpye_with_link' menu.db 1 %}">{{menu.name}}</a></li>
+		<li><a href="{% url 'tpye_with_link' menu.db 1 %}">{{menu.name}}</a></li>
 	{% endfor %}
 </ul>

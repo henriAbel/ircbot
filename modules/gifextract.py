@@ -13,7 +13,6 @@ class GifExtractor():
 
 	def getFirstFrame(self):
 		self.im = Image.open(self.thumb)
-		self.im.seek(1)
 
 	def save(self):
 		try:

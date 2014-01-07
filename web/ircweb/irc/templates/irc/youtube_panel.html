@@ -1,7 +1,6 @@
 {% spaceless %}
 	{% for link in links %}
-		<div data-url="{{link.youtubelink}}" class="youtubeLink">
-			<div class="youtubeIcon"></div>
+		<div data-url="{{link.youtubelink}}">
 			<img src="http://img.youtube.com/vi/{{link.content}}/0.jpg"/>
 		</div>
 	{% endfor %}
