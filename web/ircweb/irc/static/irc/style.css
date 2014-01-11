@@ -1,0 +1,9 @@
+.content {
+	width: 100%;
+	margin: 0 5px 0 5px;
+}
+
+.lazy img {
+	max-width: 375px;
+	margin: 5px;
+}

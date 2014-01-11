@@ -36,6 +36,8 @@ class Link(models.Model):
 	content = models.CharField(max_length=512)
 	message = models.ForeignKey(Message)
 	type = models.CharField(max_length=50)
+	width = models.IntegerField()
+	height = models.IntegerField()
 	
 	def youtubelink(self):
 		return "http://www.youtube.com/embed/%s" % self.content

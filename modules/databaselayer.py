@@ -29,3 +29,6 @@ class DatabaseLayer():
 		self.database.close()
 		return not result is None
 
+	def setDimensions(self, path, width, height):
+		self.database.make_query("UPDATE irc_link SET width = ?, height = ? WHERE content = ?", [width, height, path])
+

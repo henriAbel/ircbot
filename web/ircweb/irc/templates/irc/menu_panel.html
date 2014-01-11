@@ -1,5 +1,15 @@
-<ul>
-	{% for menu in menus %}
-		<li><a href="{% url 'tpye_with_link' menu.db 1 %}">{{menu.name}}</a></li>
-	{% endfor %}
-</ul>
+<div class="navbar navbar-default navbar-static-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<a class="navbar-brand" href="#">IRC gallery</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="#">Home</a></li>
+				{% for menu in menus %}
+				<li><a href="{% url 'tpye_with_link' menu.db 1 %}">{{menu.name}}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+</div>

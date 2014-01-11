@@ -1,4 +1,5 @@
 import os, urllib, Image
+from dimensions import Dimensions
 
 GIFDIR = os.path.join(os.getcwd(), "web/ircweb/irc/static/irc/gif/")
 THUMBDIR = os.path.join(os.getcwd(), "web/ircweb/irc/static/irc/thumb/")
@@ -10,6 +11,8 @@ class GifExtractor():
 			urllib.urlretrieve(image, self.thumb)
 			self.getFirstFrame()
 			self.save()
+			"""Get gif dimensions and save to database"""
+			d = Dimensions(self.thumb, True, image)
 
 	def getFirstFrame(self):
 		self.im = Image.open(self.thumb)

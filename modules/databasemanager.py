@@ -48,10 +48,12 @@ def check_database():
 	cursor.execute("SELECT version FROM irc_versioning ORDER BY created DESC LIMIT 1")
 	row = cursor.fetchone()
 	if row is None:
-		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.1)");
+		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.1)")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN last_checked TIMESTAMP DEFAULT '2000-01-01T00:00:00.000'")
-	"""if float(row[0]) == float(0.1):
-		cursor.execute()"""
+	if float(row[0]) == float(0.1):
+		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.2)")
+		cursor.execute("ALTER TABLE irc_link ADD COLUMN width integer NULL")
+		cursor.execute("ALTER TABLE irc_link ADD COLUMN height integer NULL")
 	
 	connection.commit()
 	connection.close()	

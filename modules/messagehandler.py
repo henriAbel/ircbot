@@ -1,8 +1,9 @@
 from twisted.words.protocols import irc
 from logger import FileLogger, SqlLogger
 from xml.dom import minidom
-from modules.gifextract import GifExtractor
-import time, re, urllib2, urlparse
+from gifextract import GifExtractor
+from dimensions import Dimensions
+import time, re, urllib2, urlparse, dimensions
 from multiprocessing import Process
 
 
@@ -48,6 +49,9 @@ class MessageHandler(irc.IRCClient):
                 if type == "gif":
                     # Downloading and converting takes time, so start in new process
                     p = Process(target=GifExtractor, args=(url,))
+                    p.start()
+                elif type == "picture":
+                    p = Process(target=Dimensions, args=(url,))
                     p.start()
             try:
                 if type == "youtube":

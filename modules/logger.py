@@ -1,5 +1,4 @@
 from databaselayer import DatabaseLayer
-from databaseconnector import DatabaseConnector
 from modules.configuration import Config
 import time
 import logging

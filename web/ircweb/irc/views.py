@@ -66,9 +66,15 @@ def getLinkCollection(category, page):
 	return Link.objects.order_by("-id").filter(type=category)[offset:limit]
 
 def getNextPage(total, current):
-	return current + 1 if total - current > 0 else -1
+	try:
+		return current + 1 if total - current > 0 else -1
+	except TypeError, e:
+		return -1
 
 def getPrevPage(total, current):
-	return current - 1 if current > 1 else -1
+	try:
+		return current - 1 if current > 1 else -1
+	except TypeError, e:
+		return -1
 
 
