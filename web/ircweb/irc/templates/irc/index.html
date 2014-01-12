@@ -1,7 +1,9 @@
 {% extends "irc/base.html" %}
 {% load content_handler %}
 {% block content %}
-
+	<script>
+		var category = '{{category}}';
+	</script>
 	{% if link %}
 		<div>
 			{% url link %}
@@ -26,9 +28,3 @@
 		</div>
 	{% endif %}
 {% endblock %}
-
-{% spaceless %}
-	{% block page %}
-		{% page next prev category%}
-	{% endblock %}
-{% endspaceless %}

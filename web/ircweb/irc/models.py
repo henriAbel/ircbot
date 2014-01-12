@@ -3,6 +3,10 @@ from django.db import models
 from datetime import datetime
 from linkwrapper import Linkwrapper
 
+""" Fixed width and height for thumbnail image. Only one value is used based on ratio """
+THUMBWIDTH = 250
+THUMBHEIGTH = 220
+
 class Linktype():
 	NORMAL = Linkwrapper("link", "Links")
 	PICTURE = Linkwrapper("picture", "Pictures")
@@ -49,3 +53,24 @@ class Link(models.Model):
 		name = os.path.basename(self.content).replace("gif", "png")
 		return "/static/irc/thumb/" + name
 
+	def thumbWidth(self):
+		if not hasattr(self, "tWidth"):
+			self.calculateThumbsize()
+
+		return self.tWidth
+
+	def thumbHeigth(self):
+		if not hasattr(self, "tHeigth"):
+			self.calculateThumbsize()
+
+		return self.tHeigth
+
+
+	def calculateThumbsize(self):
+		ratio = self.width / float(self.height)
+		#if self.width > self.height:
+		self.tWidth = THUMBWIDTH
+		self.tHeigth = self.tWidth / ratio
+		#else:
+		#	self.tHeigth = THUMBHEIGTH
+		#	self.tWidth = self.tHeigth * ratio

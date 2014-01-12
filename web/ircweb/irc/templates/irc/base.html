@@ -1,8 +1,7 @@
 {% spaceless %}
 	{% load staticfiles %}
 	{% load content_handler %}
-{% endspaceless  %}
-<!DOCTYPE html>
+<!DOCTYPE html>{% endspaceless  %}
 <html lang="en">
 <head>
 	<meta charset="utf-8">
@@ -11,13 +10,14 @@
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
 	<script src="https://code.jquery.com/jquery.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
-	<script src="{% static "irc/js/jquery.lazyload.min.js" %}"></script>
+	<script src="{% static "irc/js/waterfall.min.js" %}"></script>
+	<script src="{% static "irc/js/jquery.popup.js" %}"></script>
 	<script src="{% static "irc/js/main.js" %}"></script>
 	<title>ircbot</title>
 </head>
 
 <body>
-	{% menu %}
+	{% menu category%}
 	<div class="content">
 
 		{% spaceless %}

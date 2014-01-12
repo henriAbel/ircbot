@@ -28,6 +28,9 @@ def page(context, next, prev, category):
     }
 
 @register.inclusion_tag('irc/menu_panel.html', takes_context=True)
-def menu(context):
+def menu(context, active):
 	menus = [Linktype.NORMAL, Linktype.YOUTUBE, Linktype.GIF, Linktype.PICTURE]
-	return {"menus": menus}
+	return {
+		"menus": menus,
+		"active": active
+	}

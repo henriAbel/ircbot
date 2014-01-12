@@ -1,7 +1,5 @@
 {% spaceless %}
 	{% for link in links %}
-		<div data-url="{{link.youtubelink}}">
-			<img src="http://img.youtube.com/vi/{{link.content}}/0.jpg"/>
-		</div>
+		<img class="lazy" data-url="{{link.youtubelink}}" src="http://img.youtube.com/vi/{{link.content}}/0.jpg"/>
 	{% endfor %}
 {% endspaceless %}
