@@ -1,14 +1,14 @@
 var t;
+var href;
 var initWaterfall = function() {
 	$('.content').waterfall({
 		itemCls: 'lazy',
 		gutterWidth: 25,
 		gutterHeight: 25,
 		isFadeIn: true,
-		checkImagesLoaded: false,
-		debug: false,
+		checkImagesLoaded: true,
 		path: function(page) {
-			return '/' + category + '/' + page + '/ajax';
+			return href + '/' + page + '/ajax';
 		},
 		callbacks: {
 			renderData: function (src, dataType) {
@@ -26,7 +26,6 @@ var initWaterfall = function() {
 				if (t) {clearTimeout(t)}
 				t = setTimeout(function() {
 					$('.lazy').popup();
-					console.log('ok');
 				}, 500)
 			}
 		}
@@ -37,12 +36,21 @@ var stopWaterfall = function(callback) {
 	$('.content').waterfall('pause', callback);	
 }
 
+var updateHref = function() {
+	href = window.location.href;
+	if (href.indexOf('/', href.length -1) !== -1) {
+		href = href.substring(0, href.length -1);
+	}
+}
+
 $(function() {
+	updateHref();
 	initWaterfall();
 
 	$('#top-nav a').on('click', function(e) {
 		e.preventDefault();
-		var href = this.href;
+		history.pushState({}, '', this.href);
+		updateHref();
 		category = this.getAttribute('data-category');
 
 		$('#top-nav li.active').removeClass('active');
@@ -53,10 +61,5 @@ $(function() {
 
 			initWaterfall();	
 		});
-		
-		history.pushState({}, '', href);
-		
 	});
-
-	
 });
