@@ -5,8 +5,13 @@ import json, math
 
 ITEM_IN_PAGE = 5
 
-def index(request, category = Linktype.NORMAL.db):
+def index(request, category = None):
 	template = loader.get_template("irc/index.html")
+	""" Set category only then no category is defined. Javascript concats category with request url"""
+	if category is None:
+		category = Linktype.NORMAL.db
+	else:
+		category = ""
 	context = RequestContext(request, {
     	"category": category
    	})

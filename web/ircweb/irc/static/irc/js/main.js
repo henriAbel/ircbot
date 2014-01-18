@@ -1,5 +1,6 @@
 var t;
 var href;
+var popup;
 var initWaterfall = function() {
 	$('.content').waterfall({
 		itemCls: 'lazy',
@@ -23,10 +24,7 @@ var initWaterfall = function() {
 				} else {
 					$loading.remove();
 				}
-				if (t) {clearTimeout(t)}
-				t = setTimeout(function() {
-					$('.lazy').popup();
-				}, 500)
+				popup.reload();
 			}
 		}
 	});
@@ -45,10 +43,14 @@ var updateHref = function() {
 
 $(function() {
 	updateHref();
+	if (category.length > 1) {
+		href += '/' + category;
+	}
+	popup = $('.lazy').popup();
 	initWaterfall();
 
 	$('#top-nav a').on('click', function(e) {
-		e.preventDefault();
+		
 		history.pushState({}, '', this.href);
 		updateHref();
 		category = this.getAttribute('data-category');
@@ -61,5 +63,6 @@ $(function() {
 
 			initWaterfall();	
 		});
+		e.preventDefault();
 	});
 });

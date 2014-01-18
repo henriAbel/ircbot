@@ -15,10 +15,15 @@
             getContentUrl: function(e) {
                 return e.attr('data-url');
             },
+            getContentType: function(e) {
+                type = e.attr('data-type');
+                return type !== undefined ? type : 'image';
+            },
             fittocontent: true
         }, options );
 
         $this = $(this);
+        var self = this;
         var container,
             content,
             dummy,
@@ -38,7 +43,7 @@
             }
         }
 
-        var closeContainer = function() {
+        this.close = function() {
             container.css('opacity', '0');
             content.empty();
             setTimeout(function() {
@@ -71,48 +76,79 @@
         var setActive = function(element) {
             active = element;
             url = settings.getContentUrl(active);
+            type = settings.getContentType(active);
             if (opened) {
-                // TODO add some loading gif or smth
                 content.empty();
-                dummy.show();
             }
-            preload(url, function(e) {
-                e.style.maxWidth = '100%';
-                e.style.maxHeight = '100%';
-                // Check if need to scale wrapper 
-                var w = $(window).width() * 0.9;
-                var h = $(window).height() * 0.9;
-                var pw = this.width;
-                var ph = this.height;
-                var ratio = pw / ph;
+            else {
+                showContainer();
+            }
+            dummy.show();
+            switch(type) {
+                case 'image':
+                    preload(url, function(e) {
+                        e.style.maxWidth = '100%';
+                        e.style.maxHeight = '100%';
+                        // Check if need to scale wrapper 
+                        var w = $(window).width() * 0.9;
+                        var h = $(window).height() * 0.9;
+                        var pw = this.width;
+                        var ph = this.height;
+                        var ratio = pw / ph;
 
-                if (ph > h) {
-                    console.log('windowW: ' + w);
-                    console.log('windowH: ' + h);
-                    console.log('pw: ' + pw);
-                    console.log('ph: ' + ph);
-                    console.log('ratio: ' + ratio);
-                    ph = h;
-                    pw = ratio * h;
-                }
-                
-                if (pw > w) {
-                    pw = w;
-                    ph = pw / ratio;
-                }
+                        if (ph > h) {
+                            ph = h;
+                            pw = ratio * h;
+                        }
+                        
+                        if (pw > w) {
+                            pw = w;
+                            ph = pw / ratio;
+                        }
 
-                wrapper.css({
-                    'width':     pw,
-                    'height':    ph
-                });
-
-                setTimeout(function() {
-                    content.html(e);
-                    dummy.hide();
-                }, 300);
-            });
+                        wrapper.css({
+                            'width': pw,
+                            'height': ph
+                        });
+                        setContent(e);
+                    });
+                    break;
+                case 'youtube':
+                    var yt = document.createElement('div');
+                    content.append(yt);
+                    wrapper.css({
+                        'width': 640,
+                        'height': 480
+                    });
+                    var player = new YT.Player(yt, {
+                        videoId: url,
+                        width: 640,
+                        height: 480,
+                        playerVars: { 'autoplay': 1, 'controls': 1 },
+                        events: {
+                            'onReady': function(e) {
+                                setContent(function() {
+                                    dummy.hide();
+                                });
+                            }
+                        }
+                    });
+                    break;
+            }
             
-            showContainer();
+        }
+
+        var setContent = function(e) {
+            // Wait CSS transition complete 
+            setTimeout(function() {
+                if (typeof e == 'function ') {
+                    e.call(this);
+                }
+                else {
+                    content.html(e);
+                    dummy.hide();    
+                }
+            }, 300);
         }
 
         var createContainer = function() {
@@ -165,7 +201,7 @@
             dstyle.height = '100%';
 
             ccontainer = document.createElement('div');
-
+            ccontainer.setAttribute('id', 'popup-content');
             econtainer.appendChild(c);
             c.appendChild(dummy);
             c.appendChild(ccontainer);
@@ -213,24 +249,20 @@
             $(document).bind('keyup.popup', function(e) {
                 switch(e.which) {
                     case 27: //Esc
-                        closeContainer();
+                        self.close();
                         break;
                     case 39: // Arrow right
-                        if (hasNext()) {
-                            setActive(getNext());    
-                        }
+                        self.next();
                         break;
                     case 37: // Arrow left
-                        if (hasPrevious()) {
-                            setActive(getPrevious());    
-                        }
+                        self.prev();
                         break;
                     }
             });
 
             $(document).bind('click.popupOutside', function(e) {
                 if (e.target.getAttribute('id') == 'popup-background') {
-                    closeContainer();
+                    self.close();
                 }
             });
         }
@@ -239,12 +271,41 @@
             $(document).unbind('keyup.popup');
             $(document).unbind('click.popupOutside');
         }
+
+        this.reload = function() {
+            elements = $($this.selector);
+            elements.unbind('click.popup');
+            elements.bind('click.popup', function(e) {
+                setActive($(e.target));
+            });
+        }
+
+        this.next = function() {
+            if (hasNext()) {
+                setActive(getNext());    
+            }
+        }
+
+        this.prev = function() {
+            if (hasPrevious()) {
+                setActive(getPrevious());    
+            }
+        }
+
+        this.init = function() {
+            this.bind('click.popup', function(e) {
+                setActive($(e.target));
+            });
+            createContainer();
+            var tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            var firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            return this;
+        }
         
-        createContainer();
-
-        this.bind('click.popup', function(e) {
-            setActive($(e.target));
-        });
-
+        return this.init();
     };
-}(jQuery));
+})(jQuery);
+
