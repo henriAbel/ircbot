@@ -84,14 +84,14 @@
                 showContainer();
             }
             dummy.show();
+            var w = $(window).width() * 0.9;
+            var h = $(window).height() * 0.9;
             switch(type) {
                 case 'image':
                     preload(url, function(e) {
                         e.style.maxWidth = '100%';
                         e.style.maxHeight = '100%';
                         // Check if need to scale wrapper 
-                        var w = $(window).width() * 0.9;
-                        var h = $(window).height() * 0.9;
                         var pw = this.width;
                         var ph = this.height;
                         var ratio = pw / ph;
@@ -114,16 +114,32 @@
                     });
                     break;
                 case 'youtube':
+                    // Youtube supported resolutions
+                    var widths = [3840, 2560, 1920, 1280, 854, 640, 426];
+                    var heights = [2160, 1440, 1080, 720, 480, 360, 240];
+                    var yth, ytw;
+                    // Find biggest possible resolution fit to screen
+                    for (i = 0; i < widths.length; i++) {
+                        if (widths[i] <= w && heights[i] <= h) {
+                            yth = heights[i];
+                            ytw = widths[i];
+                            break;
+                        }
+                    }
+                    if (yth === undefined) {
+                        ytw = w;
+                        yth = h;
+                    }
                     var yt = document.createElement('div');
                     content.append(yt);
                     wrapper.css({
-                        'width': 640,
-                        'height': 480
+                        'width': ytw,
+                        'height': yth
                     });
                     var player = new YT.Player(yt, {
                         videoId: url,
-                        width: 640,
-                        height: 480,
+                        width: ytw,
+                        height: yth,
                         playerVars: { 'autoplay': 1, 'controls': 1 },
                         events: {
                             'onReady': function(e) {
