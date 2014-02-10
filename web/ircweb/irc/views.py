@@ -8,12 +8,11 @@ ITEM_IN_PAGE = 5
 def index(request, category = None):
 	template = loader.get_template("irc/index.html")
 	""" Set category only then no category is defined. Javascript concats category with request url"""
-	if category is None:
-		category = Linktype.NORMAL.db
-	else:
-		category = ""
+	link_category = Linktype.NORMAL.db if category is None else ""
+	real_category = Linktype.NORMAL.db if category is None else category
 	context = RequestContext(request, {
-    	"category": category
+    	"category": link_category,
+    	"real_category": real_category
    	})
 
 	return HttpResponse(template.render(context))
@@ -41,7 +40,7 @@ def ajax(request, category, page = 1):
     	})
 	total = Link.objects.filter(type=category).count()
 	total_pages = int(math.ceil(total / float(ITEM_IN_PAGE)))
-	
+
 	context2 = RequestContext(request, {
 		"category": category,
 		"next": getNextPage(total_pages, page),

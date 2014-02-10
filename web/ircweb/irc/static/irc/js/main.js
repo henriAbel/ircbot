@@ -43,6 +43,7 @@ var updateHref = function() {
 
 $(function() {
 	updateHref();
+	$('a[data-category="' + real_category + '"').parent().addClass('active');
 	if (category.length > 1) {
 		href += '/' + category;
 	}
