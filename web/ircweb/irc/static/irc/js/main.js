@@ -2,7 +2,7 @@ var t;
 var href;
 var popup;
 var initWaterfall = function() {
-	$('.content').waterfall({
+	$('#waterfall').waterfall({
 		itemCls: 'lazy',
 		gutterWidth: 25,
 		gutterHeight: 25,
@@ -15,7 +15,7 @@ var initWaterfall = function() {
 			renderData: function (src, dataType) {
 				if (src.count < 1) {
 					stopWaterfall();
-				} 
+				}
 				return src.data;
 			},
 			loadingFinished: function($loading, isBeyondMaxPage) {
@@ -31,7 +31,7 @@ var initWaterfall = function() {
 }
 
 var stopWaterfall = function(callback) {
-	$('.content').waterfall('pause', callback);	
+	$('#waterfall').waterfall('pause', callback);
 }
 
 var updateHref = function() {
@@ -50,7 +50,6 @@ $(function() {
 	initWaterfall();
 
 	$('#top-nav a').on('click', function(e) {
-		
 		history.pushState({}, '', this.href);
 		updateHref();
 		category = this.getAttribute('data-category');
@@ -58,10 +57,13 @@ $(function() {
 		$('#top-nav li.active').removeClass('active');
 		this.parentNode.className = 'active';
 		stopWaterfall(function() {
-			$('.content, #waterfall-message, #waterfall-loading').remove();
-			$('.navbar').after('<div class="content"></div>')
-
-			initWaterfall();	
+			// Waterfall dosent provide any destroy/reload mehtods, so delete container object and reinit plugin
+			$('#waterfall-message, #waterfall-loading').remove();
+			var c = $('#waterfall');
+			var parent = c.parent();
+			c.remove();
+			parent.append('<div id="waterfall"></div>')
+			initWaterfall();
 		});
 		e.preventDefault();
 	});

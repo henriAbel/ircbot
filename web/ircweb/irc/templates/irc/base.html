@@ -19,11 +19,11 @@
 <body>
 	{% menu category%}
 	<div class="content">
-
-		{% spaceless %}
-			{% block content %}{% endblock %}
-		{% endspaceless  %}
-
+		<div id="waterfall">
+			{% spaceless %}
+				{% block content %}{% endblock %}
+			{% endspaceless  %}
+		</div>
 	</div>
 	{% block page %}{% endblock %}
 

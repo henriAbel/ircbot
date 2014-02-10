@@ -150,6 +150,9 @@
                         }
                     });
                     break;
+                case 'custom':
+                    setContent(getContentUrl());
+                    break;
             }
             
         }
