@@ -1,4 +1,3 @@
-from databaselayer import DatabaseLayer
 from modules.configuration import Config
 import time
 import logging
@@ -11,6 +10,7 @@ class FileLogger:
 
 class SqlLogger:
     def __init__(self):
+        from databaselayer import DatabaseLayer
         self.users = {}
         self.database = DatabaseLayer()
 

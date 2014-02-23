@@ -7,7 +7,7 @@ import time, re, urllib2, urlparse, dimensions
 from multiprocessing import Process
 
 
-class MessageHandler(irc.IRCClient):  
+class MessageHandler(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = FileLogger().log
@@ -28,7 +28,7 @@ class MessageHandler(irc.IRCClient):
 
     def privmsg(self, user, channel, msg):
         user = user.split('!', 1)[0]
-        self.logger.info("<%s> %s" % (user, msg)) 
+        self.logger.info("<%s> %s" % (user, msg))
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
@@ -43,7 +43,7 @@ class MessageHandler(irc.IRCClient):
                 query = urlparse.parse_qs(url_data.query)
                 url = query["v"][0]
             # Log every message once
-            if not self.sqllogger.message_exists(msg):
+            if not self.sqllogger.message_exists(url):
                 id = self.sqllogger.log_message(msg, user)
                 self.sqllogger.log_url(url, id, type)
                 if type == "gif":
@@ -55,7 +55,7 @@ class MessageHandler(irc.IRCClient):
                     p.start()
             try:
                 if type == "youtube":
-                    xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url) 
+                    xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url)
                     xmldoc = minidom.parse(xml)
                     self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
             except urllib2.HTTPError, e:

@@ -1,8 +1,10 @@
 from databaseconnector import DatabaseConnector
+from modules.logger import FileLogger
 
 class DatabaseLayer():
 	def __init__(self):
 		self.database = DatabaseConnector()
+		self.logger = FileLogger().log
 
 	def add_user(self, username):
 		return self.database.make_query("INSERT INTO irc_users (username) VALUES (?)", [username]).lastrowid

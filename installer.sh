@@ -8,3 +8,4 @@ apt-get -y install python-pip python-flup python-mysqldb python-twisted python-i
 
 sudo pip install Django==1.5.4
 sudo pip install apscheduler
+sudo pip install django-lockdown

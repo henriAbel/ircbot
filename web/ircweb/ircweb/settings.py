@@ -3,6 +3,7 @@ import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+PASS_PROTECTED = True
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -155,3 +156,9 @@ LOGGING = {
         },
     }
 }
+
+if PASS_PROTECTED:
+    INSTALLED_APPS += ('lockdown',)
+    MIDDLEWARE_CLASSES += ('lockdown.middleware.LockdownMiddleware',)
+    LOCKDOWN_PASSWORDS = ('letmein', 'beta')
+    LOCKDOWN_LOGOUT_KEY = 'logout'
