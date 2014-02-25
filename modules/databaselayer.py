@@ -26,8 +26,9 @@ class DatabaseLayer():
 	def change_nick(self, oldnick, newnick):
 		self.database.make_query("UPDATE irc_users SET username = ? WHERE username = ? LIMIT 1", [oldnick, newnick])
 
-	def message_exists(self, message):
-		result = self.database.make_query("SELECT id FROM irc_message WHERE content = ?", [message], False).fetchone()
+	def link_exists(self, message):
+		likeClause = '%' + message + '%'
+		result = self.database.make_query("SELECT id FROM irc_link WHERE content like ?", [likeClause], False).fetchone()
 		self.database.close()
 		return not result is None
 

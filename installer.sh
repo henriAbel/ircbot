@@ -1,8 +1,5 @@
 #!/bin/bash
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root" 1>&2
-   exit 1
-fi
+if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 
 apt-get -y install python-pip python-flup python-mysqldb python-twisted python-imaging
 

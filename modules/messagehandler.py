@@ -43,7 +43,7 @@ class MessageHandler(irc.IRCClient):
                 query = urlparse.parse_qs(url_data.query)
                 url = query["v"][0]
             # Log every message once
-            if not self.sqllogger.message_exists(url):
+            if not self.sqllogger.database.link_exists(url):
                 id = self.sqllogger.log_message(msg, user)
                 self.sqllogger.log_url(url, id, type)
                 if type == "gif":
@@ -53,6 +53,8 @@ class MessageHandler(irc.IRCClient):
                 elif type == "picture":
                     p = Process(target=Dimensions, args=(url,))
                     p.start()
+            else:
+                self.logger.info("Duplicate link: %s", url)
             try:
                 if type == "youtube":
                     xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url)

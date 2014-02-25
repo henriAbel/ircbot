@@ -34,6 +34,3 @@ class SqlLogger:
 
     def log_nickchange(self, oldnick, newnick):
         self.database.change_nick(oldnick, newnick)
-
-    def message_exists(self, message):
-        return self.database.message_exists(message)
