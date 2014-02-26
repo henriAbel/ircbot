@@ -42,16 +42,22 @@ class Link(models.Model):
 	type = models.CharField(max_length=50)
 	width = models.IntegerField()
 	height = models.IntegerField()
-	
+	hashLink = models.CharField(max_length=64)
+
 	def youtubelink(self):
 		return "http://www.youtube.com/embed/%s" % self.content
 
 	def thumbLink(self):
-		if self.type != Linktype.GIF.db:
-			return None
+		if self.hashLink is None:
+			return self.content
 
-		name = os.path.basename(self.content).replace("gif", "png")
-		return "/static/irc/thumb/" + name
+		return "/static/irc/thumb/" + self.hashLink
+
+	def fullLink(self):
+		if self.hashLink is None:
+			return self.content
+
+		return "/static/irc/fullphoto/" + self.hashLink
 
 	def thumbWidth(self):
 		if not hasattr(self, "tWidth"):

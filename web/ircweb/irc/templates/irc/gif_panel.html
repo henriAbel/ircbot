@@ -1,5 +1,5 @@
-{% spaceless %}	
+{% spaceless %}
 	{% for link in links %}
-		<img class="lazy" width="{{ link.thumbWidth }}" height="{{ link.thumbHeigth }}" data-url="{{ link.content }}" src="{{ link.thumbLink }}"/>
+		<img class="lazy" width="{{ link.thumbWidth }}" height="{{ link.thumbHeigth }}" data-url="{{ link.fullLink }}" src="{{ link.thumbLink }}"/>
 	{% endfor %}
 {% endspaceless %}

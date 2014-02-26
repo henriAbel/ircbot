@@ -7,7 +7,7 @@ def check_database():
 	database.connect_database()
 	cursor = database.cursor
 	connection = database.connection
-			
+
 	# check if all tables exists
 	cursor.execute("""CREATE TABLE IF NOT EXISTS `irc_users` (
 				    `id` integer PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +32,7 @@ def check_database():
 					)""")
 
 	cursor.execute("""CREATE TABLE IF NOT EXISTS `irc_versioning` (
-				    `id` integer PRIMARY KEY AUTOINCREMENT, 
+				    `id` integer PRIMARY KEY AUTOINCREMENT,
 				    `version` decimal(2, 1) NOT NULL,
 				    `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 					)""")
@@ -42,9 +42,9 @@ def check_database():
 	cursor.execute("CREATE INDEX IF NOT EXISTS `irc_link_message_index` ON `irc_link` (`message_id`);")
 	cursor.execute("CREATE INDEX IF NOT EXISTS `irc_link_type_index` ON `irc_link` (`type`);")
 	connection.commit()
-	
+
 	# Simple versioning
-	
+
 	cursor.execute("SELECT version FROM irc_versioning ORDER BY created DESC LIMIT 1")
 	row = cursor.fetchone()
 	if row is None:
@@ -54,6 +54,9 @@ def check_database():
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.2)")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN width integer NULL")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN height integer NULL")
-	
+	if float(row[0]) == float(0.2):
+		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.3)")
+		cursor.execute("ALTER TABLE irc_link ADD COLUMN hashLink varchar(64) NULL")
+
 	connection.commit()
-	connection.close()	
+	connection.close()

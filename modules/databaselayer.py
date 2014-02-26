@@ -35,3 +35,6 @@ class DatabaseLayer():
 	def setDimensions(self, path, width, height):
 		self.database.make_query("UPDATE irc_link SET width = ?, height = ? WHERE content = ?", [width, height, path])
 
+	def setHash(self, path, hash):
+		self.database.make_query("UPDATE irc_link SET hashLink = ? WHERE content = ?", [hash, path])
+

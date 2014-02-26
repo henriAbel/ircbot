@@ -3,9 +3,8 @@ from logger import FileLogger, SqlLogger
 from xml.dom import minidom
 from gifextract import GifExtractor
 from dimensions import Dimensions
-import time, re, urllib2, urlparse, dimensions
 from multiprocessing import Process
-
+import time, re, urllib2, urlparse, dimensions, os
 
 class MessageHandler(irc.IRCClient):
     def connectionMade(self):
@@ -33,9 +32,11 @@ class MessageHandler(irc.IRCClient):
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
             type = "link"
-            if any(url.endswith(s) for s in (".jpg", ".jpeg", ".png")):
+            path = urlparse.urlparse(url).path
+            ext = os.path.splitext(path)[1]
+            if any(ext in s for s in (".jpg", ".jpeg", ".png")):
                 type = "picture"
-            elif url.endswith(".gif"):
+            elif ext == ".gif":
                 type = "gif"
             elif url.find("youtube.com/watch") != -1:
                 type = "youtube"
@@ -46,12 +47,10 @@ class MessageHandler(irc.IRCClient):
             if not self.sqllogger.database.link_exists(url):
                 id = self.sqllogger.log_message(msg, user)
                 self.sqllogger.log_url(url, id, type)
-                if type == "gif":
+                if type == "gif" or type == "picture":
                     # Downloading and converting takes time, so start in new process
-                    p = Process(target=GifExtractor, args=(url,))
-                    p.start()
-                elif type == "picture":
-                    p = Process(target=Dimensions, args=(url,))
+                    self.logger.debug("Starting subprocress {} {}".format(url, ext))
+                    p = Process(target=Dimensions, args=(url,ext))
                     p.start()
             else:
                 self.logger.info("Duplicate link: %s", url)

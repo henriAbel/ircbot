@@ -10,3 +10,7 @@ body {
 	width: auto;
 	padding: 5px;
 }
+
+img.lazy {
+	max-width: 210px;
+}

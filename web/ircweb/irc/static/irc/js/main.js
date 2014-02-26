@@ -8,6 +8,7 @@ var initWaterfall = function() {
 		gutterHeight: 25,
 		isFadeIn: true,
 		checkImagesLoaded: true,
+		colWidth: 210,
 		path: function(page) {
 			return href + '/' + page + '/ajax';
 		},
