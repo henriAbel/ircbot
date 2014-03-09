@@ -1,16 +1,15 @@
+import IMessage, plugins
 from twisted.words.protocols import irc
-from logger import FileLogger, SqlLogger
-from xml.dom import minidom
-from gifextract import GifExtractor
+from twisted.plugin import getPlugins
+from logger import FileLogger
 from dimensions import Dimensions
-from multiprocessing import Process
-import time, re, urllib2, urlparse, dimensions, os
+from irc_message import IrcMessage
+import time, re, urlparse, os, uuid
 
 class MessageHandler(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = FileLogger().log
-        self.sqllogger = SqlLogger()
         self.logger.info("Connected to %s" % self.factory.channel)
 
     def connectionLost(self, reason):
@@ -18,6 +17,7 @@ class MessageHandler(irc.IRCClient):
         self.logger.info("disconnected from %s" % self.factory.channel)
 
     def signedOn(self):
+        self.channel = self.factory.channel.split(" ")[0]
         self.join(self.factory.channel)
 
     # Converts string to unicode(utf-8) and sends to channel
@@ -25,16 +25,26 @@ class MessageHandler(irc.IRCClient):
         unicoded = message.encode(encoding='utf8')
         self.say(channel, unicoded)
 
+    def send_message(self, message):
+        self.say_decoded(self.channel, message)
+
     def privmsg(self, user, channel, msg):
+        m = IrcMessage()
+        m.uuid = uuid.uuid1().hex
+        m.msg = msg
+        m.channel = channel
         user = user.split('!', 1)[0]
+        m.user = user
         self.logger.info("<%s> %s" % (user, msg))
+        for pl in getPlugins(IMessage.IMessage, plugins):
+            pl.onMessage(self, m)
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
             type = "link"
             path = urlparse.urlparse(url).path
             ext = os.path.splitext(path)[1]
-            if any(ext in s for s in (".jpg", ".jpeg", ".png")):
+            if ext != "" and any(ext in s for s in (".jpg", ".jpeg", ".png")):
                 type = "picture"
             elif ext == ".gif":
                 type = "gif"
@@ -43,35 +53,18 @@ class MessageHandler(irc.IRCClient):
                 url_data = urlparse.urlparse(url)
                 query = urlparse.parse_qs(url_data.query)
                 url = query["v"][0]
-            # Log every message once
-            if not self.sqllogger.database.link_exists(url):
-                id = self.sqllogger.log_message(msg, user)
-                self.sqllogger.log_url(url, id, type)
-                if type == "gif" or type == "picture":
-                    # Downloading and converting takes time, so start in new process
-                    self.logger.debug("Starting subprocress {} {}".format(url, ext))
-                    p = Process(target=Dimensions, args=(url,ext))
-                    p.start()
-            else:
-                self.logger.info("Duplicate link: %s", url)
-            try:
-                if type == "youtube":
-                    xml = urllib2.urlopen("http://gdata.youtube.com/feeds/api/videos/%s" % url)
-                    xmldoc = minidom.parse(xml)
-                    self.say_decoded(channel, xmldoc.getElementsByTagName('title')[0].firstChild.nodeValue)
-            except urllib2.HTTPError, e:
-                self.logger.info("Something went wrong while resolving youtube link %s", e)
-            except Exception:
-                import traceback
-                self.logger.info("Fatal error! If you see this, please post following message to the github issuse resolver");
-                self.logger.info(traceback.format_exc())
+
+            m.type = type
+            m.url = url
+            m.ext = ext
+
+            for pl in getPlugins(IMessage.IMessage, plugins):
+                pl.onLink(self, m)
 
     def irc_NICK(self, prefix, params):
         before = prefix.split('!')[0]
         now = params[0]
         self.logger.info("%s changed nick to %s" % (before, now))
-        #self.sqllogger.log_nickchange(befor, now)
 
     def lineReceived(self, line):
         irc.IRCClient.lineReceived(self, line)
-        #self.logger.info(line)

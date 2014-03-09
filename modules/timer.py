@@ -17,7 +17,7 @@ class Timer():
 		self.log.info("Detecting broken links")
 		# Get all links where last checked time is greater than 1 day
 		for row in self.database.make_query("""SELECT l.id, m.id, l.content, l.last_checked, l.type FROM irc_message m INNER JOIN irc_link l ON l.message_id = m.id
-			WHERE julianday(Date('now')) - julianday(Date(l.last_checked)) > ? AND l.type != 'youtube';""", [DATABASE_DIFF], False).fetchall():
+			WHERE julianday(Date('now')) - julianday(Date(l.last_checked)) > ? AND l.type == 'link' ;""", [DATABASE_DIFF], False).fetchall():
 
 			if self.isBroken(row[2], (row[4] == "picture" or row[4] == "gif")):
 				self.log.info("Deleting link: %s" % row[2])

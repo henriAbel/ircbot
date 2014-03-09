@@ -17,9 +17,9 @@ class SqlLogger:
     def log_url(self, url, messageid, type):
         return self.database.add_url(url, messageid, type)
 
-    def log_message(self, message, user):
+    def log_message(self, message, user, uuid = "unknown"):
         id = self.check_user(user)
-        return self.database.add_message(message, id)
+        return self.database.add_message(message, id, uuid)
 
     # if new user, add it to the database
     def check_user(self, user):
