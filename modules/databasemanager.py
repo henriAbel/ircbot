@@ -60,10 +60,17 @@ def check_database():
 	if float(row[0] == float(0.3)):
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.4)")
 		# Delete duplicate links
-		ids = cursor.execute("SELECT id, message_id FROM irc_link AS l WHERE (SELECT COUNT(*) FROM irc_link WHERE content = l.content) > 1 LIMIT -1 OFFSET 1;").fetchall()
+		ids = cursor.execute("SELECT id, GROUP_CONCAT(id) FROM irc_link AS l WHERE (SELECT COUNT(*) FROM irc_link WHERE content = l.content) > 1 GROUP BY content;").fetchall()
 		for id in ids:
-			cursor.execute("DELETE FROM irc_link WHERE id = ?", [id[0]])
-			cursor.execute("DELETE FROM irc_message WHERE id = ?", [id[1]])
+			linkIds = id[1].split(",")
+			first = True
+			for delid in linkIds:
+				if first:
+					first = False
+					continue
+				cursor.execute("DELETE FROM irc_message WHERE id = (SELECT message_id FROM irc_link WHERE id = ?)", [delid])
+				cursor.execute("DELETE FROM irc_link WHERE id = ?", [delid])
+
 		cursor.execute("ALTER TABLE irc_message ADD COLUMN uuid integer NULL")
 
 	connection.commit()
