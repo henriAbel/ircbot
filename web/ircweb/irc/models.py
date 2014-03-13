@@ -8,10 +8,10 @@ THUMBWIDTH = 250
 THUMBHEIGTH = 220
 
 class Linktype():
-	NORMAL = Linkwrapper("link", "Links")
-	PICTURE = Linkwrapper("picture", "Pictures")
+	NORMAL = Linkwrapper("links", "Links")
+	PICTURE = Linkwrapper("pictures", "Pictures")
 	YOUTUBE = Linkwrapper("youtube", "Youtube")
-	GIF = Linkwrapper("gif", "Gifs")
+	GIF = Linkwrapper("gifs", "Gifs")
 
 class Users(models.Model):
 	username = models.CharField(max_length=100)
@@ -74,9 +74,5 @@ class Link(models.Model):
 
 	def calculateThumbsize(self):
 		ratio = self.width / float(self.height)
-		#if self.width > self.height:
 		self.tWidth = THUMBWIDTH
 		self.tHeigth = self.tWidth / ratio
-		#else:
-		#	self.tHeigth = THUMBHEIGTH
-		#	self.tWidth = self.tHeigth * ratio

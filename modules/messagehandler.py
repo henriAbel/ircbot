@@ -41,13 +41,13 @@ class MessageHandler(irc.IRCClient):
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
-            type = "link"
+            type = "links"
             path = urlparse.urlparse(url).path
             ext = os.path.splitext(path)[1]
             if ext != "" and any(ext in s for s in (".jpg", ".jpeg", ".png")):
-                type = "picture"
+                type = "pictures"
             elif ext == ".gif":
-                type = "gif"
+                type = "gifs"
             elif url.find("youtube.com/watch") != -1:
                 type = "youtube"
                 url_data = urlparse.urlparse(url)
