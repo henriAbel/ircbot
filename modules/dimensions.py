@@ -26,7 +26,7 @@ class Dimensions(object):
 		# Calculate hash from link
 		nameHash = hashlib.md5()
 		nameHash.update(path)
-		self.dbfile = nameHash.hexdigest() + ext
+		self.dbfile = "{}.{}".format(nameHash.hexdigest(), ext)
 		self.logger.debug("Link: {} MD5 filename is: {}".format(path, self.dbfile))
 
 		# Save image width and height to database

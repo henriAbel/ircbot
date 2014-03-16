@@ -57,23 +57,19 @@ def doDatabaseUpdate(cursor):
 	cursor.execute("SELECT version FROM irc_versioning ORDER BY version DESC LIMIT 1")
 	row = cursor.fetchone()
 	if row is None:
-		print "0"
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.1)")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN last_checked TIMESTAMP DEFAULT '2000-01-01T00:00:00.000'")
 		return True
 	if float(row[0]) == float(0.1):
-		print "1"
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.2)")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN width integer NULL")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN height integer NULL")
 		return True
 	if float(row[0]) == float(0.2):
-		print "2"
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.3)")
 		cursor.execute("ALTER TABLE irc_link ADD COLUMN hashLink varchar(64) NULL")
 		return True
 	if float(row[0] == float(0.3)):
-		print "3"
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.4)")
 		# Delete duplicate links
 		ids = cursor.execute("SELECT id, GROUP_CONCAT(id) FROM irc_link AS l WHERE (SELECT COUNT(*) FROM irc_link WHERE content = l.content) > 1 GROUP BY content;").fetchall()
@@ -90,7 +86,6 @@ def doDatabaseUpdate(cursor):
 		cursor.execute("ALTER TABLE irc_message ADD COLUMN uuid integer NULL")
 		return True
 	if float(row[0] == float(0.4)):
-		print "4"
 		cursor.execute("INSERT INTO irc_versioning (version) VALUES (0.5)")
 		cursor.execute("UPDATE irc_link SET type = 'gifs' WHERE type = 'gif'")
 		cursor.execute("UPDATE irc_link SET type = 'pictures' WHERE type = 'picture'")

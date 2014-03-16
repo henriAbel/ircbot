@@ -4,7 +4,7 @@ from twisted.plugin import getPlugins
 from logger import FileLogger
 from dimensions import Dimensions
 from irc_message import IrcMessage
-import time, re, urlparse, os, uuid
+import time, re, urlparse, os, uuid, urlActions
 
 class MessageHandler(irc.IRCClient):
     def connectionMade(self):
@@ -41,22 +41,29 @@ class MessageHandler(irc.IRCClient):
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
-            type = "links"
-            path = urlparse.urlparse(url).path
-            ext = os.path.splitext(path)[1]
-            if ext != "" and any(ext in s for s in (".jpg", ".jpeg", ".png")):
+            # Check if we are dealing with dropbox links
+            if url.find("www.dropbox.com/s/") != -1:
+                #https://www.dropbox.com/help/201/en
+                url += "?dl=1"
+            contentType = urlActions.getContentType(url)["type"]
+            # Only end of content type is important
+            contentType = contentType.replace("image/", "")
+            self.logger.info(contentType)
+            if contentType != "" and any(contentType in s for s in ("jpg", "jpeg", "png")):
                 type = "pictures"
-            elif ext == ".gif":
+            elif contentType == "gif":
                 type = "gifs"
             elif url.find("youtube.com/watch") != -1:
                 type = "youtube"
                 url_data = urlparse.urlparse(url)
                 query = urlparse.parse_qs(url_data.query)
                 url = query["v"][0]
+            else:
+                type = "links"
 
             m.type = type
             m.url = url
-            m.ext = ext
+            m.ext = contentType
 
             for pl in getPlugins(IMessage.IMessage, plugins):
                 pl.onLink(self, m)

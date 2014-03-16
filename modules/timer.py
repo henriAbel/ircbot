@@ -1,6 +1,7 @@
 from apscheduler.scheduler import Scheduler
 from databaseconnector import DatabaseConnector
 from logger import FileLogger
+import urlActions
 import urllib2
 
 # How often run timer job
@@ -29,23 +30,25 @@ class Timer():
 		self.database.close()
 
 	def isBroken(self, link, image = True):
-		try:
-			request = urllib2.Request(link)
-			request.get_method = lambda : "HEAD"
+		request = urllib2.Request(link)
+		request.get_method = lambda : "HEAD"
 
-			response = urllib2.urlopen(request)
-			code = response.getcode()
-			info = response.info()
-			self.log.info("Link %s returned with code %s" % (link, code))
-			if int(code) >= 400:
-				return True
-			elif image and info["Content-Type"].startswith("text/html"):
-				return True
-
+		response = urllib2.urlopen(request)
+		code = response.getcode()
+		info = response.info()
+		content = urlActions.getContentType(link)
+		if not content:
+			self.log.info("Something went wrong while checking link %s" % link)
 			return False
-		except Exception, e:
-			# TODO On exception dont always return True
+
+		self.log.info("Link %s returned with code %s" % (link, content["code"]))
+		if int(content["code"]) >= 400:
 			return True
+		elif image and content["type"].startswith("text/html"):
+			return True
+
+		#TODO Handle error codes < 400
+		return False
 
 timer = Timer()
 sched = Scheduler()
