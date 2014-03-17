@@ -21,7 +21,7 @@ class databse_logger(object):
         if not self.sqllogger.database.link_exists(message.url):
             id = self.sqllogger.log_message(message.msg, message.user, message.uuid)
             self.sqllogger.log_url(message.url, id, message.type)
-            if message.type == "gif" or message.type == "picture":
+            if message.type == "gifs" or message.type == "pictures":
                 # Downloading and converting takes time, so start in new process
                 self.logger.debug("Starting subprocress {} {}".format(message.url, message.ext))
                 p = Process(target=Dimensions, args=(message.url, message.ext))

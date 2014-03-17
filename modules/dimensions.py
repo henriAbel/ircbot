@@ -18,6 +18,7 @@ class Dimensions(object):
 		# Get image
 		self.img = self.getRemote(path)
 		if self.img is None:
+			self.logger.info("{} returned None".format(path))
 			return
 		self.im = Image.open(self.img)
 		size = self.im.size

@@ -4,6 +4,7 @@ from twisted.plugin import getPlugins
 from logger import FileLogger
 from dimensions import Dimensions
 from irc_message import IrcMessage
+from databaselayer import DatabaseLayer
 import time, re, urlparse, os, uuid, urlActions
 
 class MessageHandler(irc.IRCClient):
@@ -11,6 +12,7 @@ class MessageHandler(irc.IRCClient):
         irc.IRCClient.connectionMade(self)
         self.logger = FileLogger().log
         self.logger.info("Connected to %s" % self.factory.channel)
+        self.databaselayer = DatabaseLayer()
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLost(self, reason)
@@ -29,6 +31,8 @@ class MessageHandler(irc.IRCClient):
         self.say_decoded(self.channel, message)
 
     def privmsg(self, user, channel, msg):
+        if msg.startswith("!"):
+            self.commandReceived(msg[1:])
         m = IrcMessage()
         m.uuid = uuid.uuid1().hex
         m.msg = msg
@@ -48,7 +52,6 @@ class MessageHandler(irc.IRCClient):
             contentType = urlActions.getContentType(url)["type"]
             # Only end of content type is important
             contentType = contentType.replace("image/", "")
-            self.logger.info(contentType)
             if contentType != "" and any(contentType in s for s in ("jpg", "jpeg", "png")):
                 type = "pictures"
             elif contentType == "gif":
@@ -75,3 +78,7 @@ class MessageHandler(irc.IRCClient):
 
     def lineReceived(self, line):
         irc.IRCClient.lineReceived(self, line)
+
+    def commandReceived(self, command):
+        if command == "version":
+            self.send_message(str(self.databaselayer.getVersion()))

@@ -43,3 +43,8 @@ class DatabaseLayer():
 	def setHash(self, path, hash):
 		self.database.make_query("UPDATE irc_link SET hashLink = ? WHERE content = ?", [hash, path])
 
+	def getVersion(self):
+		result = self.database.make_query("SELECT version FROM irc_versioning ORDER BY version DESC LIMIT 1", [], False).fetchone()
+		self.database.close()
+		return result[0]
+
