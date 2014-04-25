@@ -6,11 +6,13 @@ from dimensions import Dimensions
 from irc_message import IrcMessage
 from databaselayer import DatabaseLayer
 import time, re, urlparse, os, uuid, urlActions
+import datetime
 
 class MessageHandler(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = FileLogger().log
+        self.debug = FileLogger()
         self.logger.info("Connected to %s" % self.factory.channel)
         self.databaselayer = DatabaseLayer()
 
@@ -31,6 +33,7 @@ class MessageHandler(irc.IRCClient):
         self.say_decoded(self.channel, message)
 
     def privmsg(self, user, channel, msg):
+        self.logger.info("privmsg")
         if msg.startswith("!"):
             self.commandReceived(msg[1:])
         m = IrcMessage()
@@ -45,6 +48,7 @@ class MessageHandler(irc.IRCClient):
 
         urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg)
         for url in urls:
+            self.logger.info("url loop")
             # Check if we are dealing with dropbox links
             if url.find("www.dropbox.com/s/") != -1:
                 #https://www.dropbox.com/help/201/en
@@ -67,8 +71,9 @@ class MessageHandler(irc.IRCClient):
             m.type = type
             m.url = url
             m.ext = contentType
-
+            self.logger.info("getPlugins")
             for pl in getPlugins(IMessage.IMessage, plugins):
+                self.logger.info("post to plugin")
                 pl.onLink(self, m)
 
     def irc_NICK(self, prefix, params):
@@ -82,3 +87,7 @@ class MessageHandler(irc.IRCClient):
     def commandReceived(self, command):
         if command == "version":
             self.send_message(str(self.databaselayer.getVersion()))
+        elif command == "debug":
+            for line in self.debug.tail():
+                self.send_message(line);
+

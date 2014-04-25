@@ -1,12 +1,20 @@
 from modules.configuration import Config
 import time
 import logging
+import os
 
 class FileLogger:
     def __init__(self):
-        config = Config("config")
-        logging.basicConfig(filename="logs/" + config.get_option("log_file"), level=20, format='%(asctime)s %(levelname)-8s %(message)s')
+        self.config = Config("config")
+        logging.basicConfig(filename="logs/" + self.config.get_option("log_file"), level=20, format='%(asctime)s %(levelname)-8s %(message)s')
         self.log = logging.getLogger("")
+
+    def tail(self):
+        stdin,stdout = os.popen2("tail -n 10 " + "logs/" + self.config.get_option("log_file"))
+        stdin.close()
+        lines = stdout.readlines();
+        stdout.close()
+        return lines[:]
 
 class SqlLogger:
     def __init__(self):

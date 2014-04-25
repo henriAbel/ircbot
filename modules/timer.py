@@ -20,15 +20,15 @@ class Timer():
 		self.log.info("Detecting broken links")
 		# Get all links where last checked time is greater than 1 day
 		for row in self.database.make_query("""SELECT l.id, m.id, l.content, l.last_checked, l.type, l.hashLink FROM irc_message m INNER JOIN irc_link l ON l.message_id = m.id
-			WHERE julianday(Date('now')) - julianday(Date(l.last_checked)) > ? AND (l.type == 'links' OR (l.type == 'gifs' AND l.hashLink IS NULL)) ;""", [DATABASE_DIFF], False).fetchall():
+			WHERE julianday(Date('now')) - julianday(Date(l.last_checked)) > ? AND (l.type == 'links' OR ((l.type == 'gifs' OR l.type == 'pictures') AND l.hashLink IS NULL)) ;""", [DATABASE_DIFF], False).fetchall():
 			# Check if there are any gifs with empty hashLink
-			if row[4] == "gifs":
+			if row[4] == "gifs" or row[4] == "pictures":
 				# If such links exists then try to populate hashLink or delete from database
-				self.log.info("Found gif: {} with empty hahsLink".format(row[2]))
+				self.log.info("Found image: {} with empty hahsLink".format(row[2]))
 				content = urlActions.getContentType(row[2])
-				if content is None or content["tpye"] != "image/gif":
+				if content is None or content["tpye"] == "text/html":
 					self.deleteRecord(row)
-					self.log.info("Deleting gif: {} from database due to broken link".format(row[2]))
+					self.log.info("Deleting image: {} from database due to broken link".format(row[2]))
 					continue
 				p = Process(target=Dimensions, args=(row[2], content["type"].replace("image/", "")))
 				p.start()
