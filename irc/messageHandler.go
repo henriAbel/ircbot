@@ -22,19 +22,22 @@ const (
 )
 
 type Handler struct {
-	conn     *client.Conn
-	urlRegex *regexp.Regexp
-	channel  string
-	database IrcDatabase
+	conn         *client.Conn
+	urlRegex     *regexp.Regexp
+	commandRegex *regexp.Regexp
+	channel      string
+	database     IrcDatabase
 }
 
 func NewHandler(conn *client.Conn, channel string) Handler {
 	r, _ := regexp.Compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+	r2, _ := regexp.Compile("^!([^\\s]+)")
 	h := Handler{
-		conn:     conn,
-		urlRegex: r,
-		channel:  channel,
-		database: IrcDatabase{},
+		conn:         conn,
+		urlRegex:     r,
+		commandRegex: r2,
+		channel:      channel,
+		database:     IrcDatabase{},
 	}
 	// Just for error checking
 	db := h.database.Open()
@@ -74,6 +77,12 @@ func (h *Handler) Recv(line string, sender string) {
 			h.database.LogDuplicate(link, sender)
 		}
 	}
+	if strings.HasPrefix(line, "!") {
+		command := h.commandRegex.FindAllString(line, 1)[0]
+		if command == "!google" {
+			h.GoogleSearch(strings.TrimSpace(strings.Replace(line, command, "", -1)))
+		}
+	}
 }
 
 func (h *Handler) Youtube(videoId string, sender string) {
@@ -87,6 +96,19 @@ func (h *Handler) Youtube(videoId string, sender string) {
 	json, _ := simpleJson.NewFromReader(res.Body)
 	title, _ := json.Get("items").GetIndex(0).Get("snippet").Get("title").String()
 	h.conn.Privmsg(h.channel, title)
+}
+
+func (h *Handler) GoogleSearch(query string) {
+	var queryUrl = fmt.Sprintf("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=%s", urlLib.QueryEscape(query))
+	res, err := http.Get(queryUrl)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer res.Body.Close()
+	json, _ := simpleJson.NewFromReader(res.Body)
+	result, _ := json.Get("responseData").Get("results").GetIndex(0).Get("url").String()
+	h.conn.Privmsg(h.channel, result)
 }
 
 func inArray(a string, list []string) bool {
