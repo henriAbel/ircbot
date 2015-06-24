@@ -1,10 +1,14 @@
 package irc
 
 import (
-	//"encoding/json"
+	"bufio"
+	"bytes"
 	"fmt"
 	simpleJson "github.com/bitly/go-simplejson"
 	client "github.com/fluffle/goirc/client"
+	gif "image/gif"
+	jpeg "image/jpeg"
+	"io/ioutil"
 	"net/http"
 	urlLib "net/url"
 	"regexp"
@@ -48,6 +52,11 @@ func NewHandler(conn *client.Conn, channel string) Handler {
 func (h *Handler) Recv(line string, sender string) {
 	url := h.urlRegex.FindString(line)
 	if len(url) > 0 {
+		cs := make(chan *DBLink)
+		// Messages have to go somewhere(all links don't have goroutine)
+		go func() {
+			_ = <-cs
+		}()
 		var linkType = Link
 		if strings.Index(url, "youtube.com/watch") > 0 {
 			parsedUrl, _ := urlLib.Parse(url)
@@ -63,17 +72,20 @@ func (h *Handler) Recv(line string, sender string) {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
 				linkType = Gif
+				go h.Gif(cs)
 			} else if inArray(urlSuffix, Images) {
 				linkType = Image
+				go h.Image(cs)
 			}
 		}
 
 		link := h.database.GetLink(url)
 		if (*link == DBLink{}) {
-			h.database.AddLink(url, linkType, sender)
+			l := h.database.AddLink(url, linkType, sender)
+			cs <- l
 		} else {
 			loc, _ := time.LoadLocation("Europe/Tallinn")
-			h.conn.Privmsg(h.channel, fmt.Sprintf("OLD! Selle on varem saatnud juba %s %s!\n", link.sender_name.String, link.date.In(loc).Format("2006-01-02 15:04")))
+			h.conn.Privmsg(h.channel, fmt.Sprintf("OLD! Selle on varem saatnud juba %s %s!\n", link.Sender_name.String, link.Date.In(loc).Format("2006-01-02 15:04")))
 			h.database.LogDuplicate(link, sender)
 		}
 	}
@@ -83,6 +95,47 @@ func (h *Handler) Recv(line string, sender string) {
 			h.GoogleSearch(strings.TrimSpace(strings.Replace(line, command, "", -1)))
 		}
 	}
+}
+
+func (h *Handler) Image(cs chan *DBLink) {
+	link := <-cs
+	response, err := http.Get(link.Link.String)
+	if err != nil || response.StatusCode != 200 {
+		fmt.Println(fmt.Sprintf("Can't download Image %s err %s", link.Link.String, err))
+		return
+	}
+	defer response.Body.Close()
+	data, _ := ioutil.ReadAll(response.Body)
+	h.database.AddRaw(RawImage, link, response.Header.Get("Content-Type"), data)
+}
+
+func (h *Handler) Gif(cs chan *DBLink) {
+	link := <-cs
+	url := link.Link.String
+	response, err := http.Get(url)
+	if err != nil || response.StatusCode != 200 {
+		fmt.Println(fmt.Sprintf("Can't download GIF %s err %s", url, err))
+		return
+	}
+	defer response.Body.Close()
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Can't open http response %s", err))
+	}
+	img, err := gif.DecodeAll(bytes.NewReader(data))
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Cant parse GIF %s", err))
+		return
+	}
+
+	var b bytes.Buffer
+	w := bufio.NewWriter(&b)
+	err = jpeg.Encode(w, img.Image[0], nil)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Can't convert to jpeg %s", err))
+	}
+	h.database.AddRaw(RawGifFrame, link, "image/jpeg", b.Bytes())
+	h.database.AddRaw(RawGif, link, "image/gif", data)
 }
 
 func (h *Handler) Youtube(videoId string, sender string) {

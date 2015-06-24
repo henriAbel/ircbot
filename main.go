@@ -1,14 +1,13 @@
 package main
 
 import (
+	irc "./irc"
+	web "./web"
 	crypt "crypto/tls"
 	"fmt"
 	client "github.com/fluffle/goirc/client"
-	irc "github.com/henriabel/ircbot/irc"
 	"os"
 )
-
-var A = "asd"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -47,6 +46,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("Connection error: %s\n", err)
 	}
-
+	web.StartWeb()
 	<-quit
 }

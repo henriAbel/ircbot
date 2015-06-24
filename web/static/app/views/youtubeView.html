@@ -1,0 +1,8 @@
+<div ng-click="youtubeClick()" ng-hide="clicked">
+	<img src="http://img.youtube.com/vi/n907I79y2kY/0.jpg" />
+</div>
+<div ng-if="clicked">
+	<span ng-click="youtubeClick()" class="youtube-close glyphicon glyphicon-remove" aria-hidden="true"></span>
+	<iframe  id="ytplayer" type="text/html" width="640" height="390" ng-src="{{videoUrl}}"
+  frameborder="0"/>
+</div>
