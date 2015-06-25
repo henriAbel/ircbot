@@ -184,11 +184,7 @@ func (i *IrcDatabase) GetAll(limit int, offset int, link_types []string) *[]DBLi
 		link_types = []string{Image, Gif, Link, Youtube}
 	}
 
-	// Better, less hacky way??
-	params := make([]interface{}, len(link_types)+2)
-	for i, s := range link_types {
-		params[i] = s
-	}
+	params := string_to_interface(&link_types)
 
 	params[len(params)-2] = limit
 	params[len(params)-1] = offset
@@ -204,6 +200,20 @@ func (i *IrcDatabase) GetAll(limit int, offset int, link_types []string) *[]DBLi
 		links = append(links, link)
 	}
 	return &links
+}
+
+func (i *IrcDatabase) GetCount(link_types []string) int {
+	db := i.Open()
+	defer db.Close()
+	if len(link_types) == 0 {
+		link_types = []string{Image, Gif, Link, Youtube}
+	}
+
+	params := string_to_interface(&link_types)
+	row := db.QueryRow(fmt.Sprintf("SELECT count(*) FROM irc_link AS link LEFT JOIN irc_user AS user on (user.id = link.sender_id) WHERE link.link_type IN (%s)", generatePlaceHolders(&link_types)), params...)
+	var count = 0
+	row.Scan(&count)
+	return count
 }
 
 func (i *IrcDatabase) GetRaw(linkId int, rawType string) *DBRaw {
@@ -254,4 +264,13 @@ func rowToDBLink(row *sql.Row) *DBLink {
 		return &DBLink{}
 	}
 	return &link
+}
+
+func string_to_interface(link_types *[]string) []interface{} {
+	// Better, less hacky way??
+	params := make([]interface{}, len(*link_types)+2)
+	for i, s := range *link_types {
+		params[i] = s
+	}
+	return params
 }

@@ -1,0 +1,15 @@
+<div class="row marketing">
+	<h4>IRC images and stuff</h4>
+
+	<button class="btn btn-default" ng-hide="offset == 0" ng-click="loadPrev()">Load previous</button>
+	<p>Page {{page}} / {{listCount}}</p>
+
+	<div ng-class="{'pull-left': filter != 'link'}" class="image-list-item" ng-repeat="link in links">
+		<span ng-link ng-model="link"></span>
+	</div>
+
+	<div class="load-more-wrap">
+		<hr />
+		<button class="btn btn-default" ng-hide="links.length == 0" ng-click="loadNext()">Load more</button>
+	</div>
+</div>

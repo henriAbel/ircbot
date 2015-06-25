@@ -97,3 +97,7 @@ body {
 	text-align: center;
 	margin: 4px;
 }
+
+.load-more-wrap {
+	clear: both;
+}

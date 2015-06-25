@@ -10,13 +10,26 @@ angular
 	.config(function ($routeProvider) {
 		$routeProvider
 			.when('/', {
-				templateUrl: 'views/imageList.html',
-				controller: 'ImageController'
+				templateUrl: 'views/list.html',
+				controller: 'ListController',
+				resolve: {
+					filter: function(){return 'image,gif'}
+				}
 			})
 			.when('/links/', {
-				templateUrl: 'views/listView.html',
-				controller: 'LinkController'
-			})     
+				templateUrl: 'views/list.html',
+				controller: 'ListController',
+				resolve: {
+					filter: function(){return 'link'}
+				}
+			})
+			.when('/youtube/', {
+				templateUrl: 'views/list.html',
+				controller: 'ListController',
+				resolve: {
+					filter: function(){return 'youtube'}
+				}
+			})
 			.otherwise({
 				redirectTo: '/'
 			});

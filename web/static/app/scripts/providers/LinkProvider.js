@@ -9,6 +9,12 @@ angular.module('ircbotApp').provider('LinkProvider', function() {
 			},
 			getRaw: {
 				method: 'GET',
+			},
+			getCount: {
+				method: 'GET',
+				params: {
+					param1: 'count'
+				}
 			}
 		});
 

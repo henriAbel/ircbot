@@ -23,6 +23,10 @@ type Link struct {
 	Sender_name string
 }
 
+type Count struct {
+	Count int
+}
+
 func NewLinkService() LinkService {
 	return LinkService{
 		database: irc.IrcDatabase{},
@@ -72,6 +76,20 @@ func (l *LinkService) GetAll(w rest.ResponseWriter, r *rest.Request) {
 	dblinks := transform(l.database.GetAll(limit, offset, filter))
 	l.Unlock()
 	w.WriteJson(dblinks)
+}
+
+func (l *LinkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
+	filterParam := r.URL.Query().Get("filter")
+	filter := []string{}
+	if len(filterParam) > 0 {
+		filter = strings.Split(filterParam, ",")
+	}
+
+	l.Lock()
+	count := l.database.GetCount(filter)
+	l.Unlock()
+
+	w.WriteJson(Count{count})
 }
 
 func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {

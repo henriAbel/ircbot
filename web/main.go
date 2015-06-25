@@ -35,6 +35,7 @@ func StartWeb() {
 		rest.Post("/login", jwt_middleware.LoginHandler),
 		rest.Get("/refresh_token", jwt_middleware.RefreshHandler),
 		rest.Get("/links", service.GetAll),
+		rest.Get("/links/count", service.GetCount),
 		rest.Get("/raw/:id/:type", service.Raw),
 	)
 	api.SetApp(api_router)
