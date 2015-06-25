@@ -53,10 +53,6 @@ func (h *Handler) Recv(line string, sender string) {
 	url := h.urlRegex.FindString(line)
 	if len(url) > 0 {
 		cs := make(chan *DBLink)
-		// Messages have to go somewhere(all links don't have goroutine)
-		go func() {
-			_ = <-cs
-		}()
 		var linkType = Link
 		if strings.Index(url, "youtube.com/watch") > 0 {
 			parsedUrl, _ := urlLib.Parse(url)
@@ -82,7 +78,10 @@ func (h *Handler) Recv(line string, sender string) {
 		link := h.database.GetLink(url)
 		if (*link == DBLink{}) {
 			l := h.database.AddLink(url, linkType, sender)
-			cs <- l
+			select {
+			case cs <- l:
+			default:
+			}
 		} else {
 			loc, _ := time.LoadLocation("Europe/Tallinn")
 			h.conn.Privmsg(h.channel, fmt.Sprintf("OLD! Selle on varem saatnud juba %s %s!\n", link.Sender_name.String, link.Date.In(loc).Format("2006-01-02 15:04")))
@@ -109,8 +108,10 @@ func (h *Handler) Image(cs chan *DBLink) {
 	h.database.AddRaw(RawImage, link, response.Header.Get("Content-Type"), data)
 }
 
-func (h *Handler) Gif(cs chan *DBLink) {
+func (h *Handler) Gif(cs <-chan *DBLink) {
+	fmt.Println("method gif")
 	link := <-cs
+	fmt.Println("channel gif")
 	url := link.Link.String
 	response, err := http.Get(url)
 	if err != nil || response.StatusCode != 200 {
