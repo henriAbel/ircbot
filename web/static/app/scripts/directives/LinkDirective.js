@@ -37,8 +37,9 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 				scope.contentUrl = formatUrl('/views/imageView.html')
 			}
 			else if (scope.ngModel.Link_type == "youtube") {
+				scope.videoID = getValueFromQuery(scope.ngModel.Link, "v");
 				scope.videoUrl = $sce.trustAsResourceUrl("http://www.youtube.com/embed/" + 
-					getValueFromQuery(scope.ngModel.Link, "v") + "?autoplay=1");
+					 scope.videoID + "?autoplay=1");
 				scope.contentUrl = formatUrl('/views/youtubeView.html')
 				scope.youtubeClick = function() {
 					scope.clicked = !scope.clicked;
