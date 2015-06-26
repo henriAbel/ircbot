@@ -95,7 +95,7 @@ func (l *LinkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
 func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 	resourceType := r.PathParam("type")
 
-	resourceId, err := strconv.Atoi(r.PathParam("id"))
+	resourceId, err := strconv.ParseInt(r.PathParam("id"), 10, 64)
 	if err != nil {
 		rest.Error(w, "Can't parse resource id", 400)
 		return
@@ -108,6 +108,7 @@ func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		link := l.database.GetLinkById(resourceId)
 		w.Header().Set("Location", link.Link.String)
 		w.WriteHeader(303)
+		irc.ImageAction.CheckImage(link)
 	} else {
 		w.Header().Set("Content-Type", rawData.Mime_type.String)
 		w.(http.ResponseWriter).Write(rawData.Data)

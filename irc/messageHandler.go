@@ -1,14 +1,9 @@
 package irc
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	simpleJson "github.com/bitly/go-simplejson"
 	client "github.com/fluffle/goirc/client"
-	gif "image/gif"
-	jpeg "image/jpeg"
-	"io/ioutil"
 	"net/http"
 	urlLib "net/url"
 	"regexp"
@@ -68,10 +63,10 @@ func (h *Handler) Recv(line string, sender string) {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
 				linkType = Gif
-				go h.Gif(cs)
-			} else if inArray(urlSuffix, Images) {
+				go ImageAction.Gif(cs)
+			} else if EndsWith(urlSuffix, Images) {
 				linkType = Image
-				go h.Image(cs)
+				go ImageAction.Image(cs)
 			}
 		}
 
@@ -94,49 +89,6 @@ func (h *Handler) Recv(line string, sender string) {
 			h.GoogleSearch(strings.TrimSpace(strings.Replace(line, command, "", -1)))
 		}
 	}
-}
-
-func (h *Handler) Image(cs chan *DBLink) {
-	link := <-cs
-	response, err := http.Get(link.Link.String)
-	if err != nil || response.StatusCode != 200 {
-		fmt.Println(fmt.Sprintf("Can't download Image %s err %s", link.Link.String, err))
-		return
-	}
-	defer response.Body.Close()
-	data, _ := ioutil.ReadAll(response.Body)
-	h.database.AddRaw(RawImage, link, response.Header.Get("Content-Type"), data)
-}
-
-func (h *Handler) Gif(cs <-chan *DBLink) {
-	fmt.Println("method gif")
-	link := <-cs
-	fmt.Println("channel gif")
-	url := link.Link.String
-	response, err := http.Get(url)
-	if err != nil || response.StatusCode != 200 {
-		fmt.Println(fmt.Sprintf("Can't download GIF %s err %s", url, err))
-		return
-	}
-	defer response.Body.Close()
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Can't open http response %s", err))
-	}
-	img, err := gif.DecodeAll(bytes.NewReader(data))
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Cant parse GIF %s", err))
-		return
-	}
-
-	var b bytes.Buffer
-	w := bufio.NewWriter(&b)
-	err = jpeg.Encode(w, img.Image[0], nil)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Can't convert to jpeg %s", err))
-	}
-	h.database.AddRaw(RawGifFrame, link, "image/jpeg", b.Bytes())
-	h.database.AddRaw(RawGif, link, "image/gif", data)
 }
 
 func (h *Handler) Youtube(videoId string, sender string) {
@@ -165,7 +117,7 @@ func (h *Handler) GoogleSearch(query string) {
 	h.conn.Privmsg(h.channel, result)
 }
 
-func inArray(a string, list []string) bool {
+func EndsWith(a string, list []string) bool {
 	for _, b := range list {
 		if strings.HasPrefix(a, b) {
 			return true

@@ -35,6 +35,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 			}
 			else if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
+				scope.imageUrl = "/api/raw/" + scope.ngModel.Key + "/thumb"
 			}
 			else if (scope.ngModel.Link_type == "youtube") {
 				scope.videoID = getValueFromQuery(scope.ngModel.Link, "v");

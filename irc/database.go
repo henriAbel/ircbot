@@ -34,10 +34,11 @@ type DBRaw struct {
 const (
 	Duplicate = "Duplicate"
 	// Gif first frame as jpeg image
-	RawGifFrame      = "gif1"
-	RawGif           = "gif"
-	RawImage         = "image"
-	database_version = 1
+	RawGifFrame       = "gif1"
+	RawGif            = "gif"
+	RawImage          = "image"
+	RawImageThumbnail = "thumb"
+	database_version  = 1
 )
 
 type IrcDatabase struct {
@@ -88,17 +89,18 @@ func (i *IrcDatabase) create(db *sql.DB) {
 			mime_type varchar(255) NOT NULL,
 			data BLOB
 		)`)
-	current_version := i.GetDatabaseVersion()
+	db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS irc_raw_link_id_type_index ON irc_raw(link_id, data_type)")
+	/*current_version := i.GetDatabaseVersion()
 	if current_version != database_version {
 		for current_version < database_version {
-			/*switch current_version {
+			switch current_version {
 			case 0:
 
-			}*/
+			}
 
 			current_version++
 		}
-	}
+	}*/
 	transaction.Commit()
 }
 
@@ -109,7 +111,7 @@ func (i *IrcDatabase) GetLink(url string) *DBLink {
 	return rowToDBLink(row)
 }
 
-func (i *IrcDatabase) GetLinkById(id int) *DBLink {
+func (i *IrcDatabase) GetLinkById(id int64) *DBLink {
 	db := i.Open()
 	defer db.Close()
 	row := db.QueryRow("SELECT link.*, user.user_name FROM irc_link AS link LEFT JOIN irc_user AS user on (user.id = link.sender_id) WHERE link.id = ?", id)
@@ -216,7 +218,7 @@ func (i *IrcDatabase) GetCount(link_types []string) int {
 	return count
 }
 
-func (i *IrcDatabase) GetRaw(linkId int, rawType string) *DBRaw {
+func (i *IrcDatabase) GetRaw(linkId int64, rawType string) *DBRaw {
 	db := i.Open()
 	defer db.Close()
 	row := db.QueryRow("SELECT mime_type, data, link_id, data_type FROM irc_raw WHERE link_id = ? AND data_type = ?", linkId, rawType)
