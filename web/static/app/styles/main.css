@@ -101,3 +101,32 @@ body {
 .load-more-wrap {
 	clear: both;
 }
+
+.display-box {
+	padding: 50px;
+	background-color: black;
+	clear: both;
+	color: white;
+}
+
+.gif-box {
+	background-color: rgba(0,0,0,0.4);
+	line-height: 200px;
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 100%;
+
+	text-shadow: -1px -1px 1px #fff, 1px 1px 1px #000;
+	color: #fff;
+	opacity: 0.9;
+	font: 40px 'Museo700';	
+}
+
+.gif-box:hover {
+	opacity: 0;
+}
+
+.gif-wrapper {
+	position: relative;
+}

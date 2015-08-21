@@ -13,3 +13,11 @@
 		<button class="btn btn-default" ng-hide="links.length == 0" ng-click="loadNext()">Load more</button>
 	</div>
 </div>
+
+<script type="text/ng-template" id="displayBoxTemplate.html">
+	<div class="display-box" ng-show="displayObject" ng-click="hideImage()">
+		<span>{{displayObject.model.Sender_name}}</span>
+		<span>{{displayObject.model.Date * 1000 | date:'yyyy-MM-dd HH:mm'}}</span>
+		<img ng-src="{{displayObject.url}}" />
+	</div>
+</script>

@@ -58,7 +58,7 @@ func (i *imageAction) Image(cs chan *DBLink) {
 			return
 		}
 	} else {
-		fmt.Println(fmt.Sprintf("Can't make thumbnail, unknown image format %s", link.Link.String))
+		fmt.Println(fmt.Sprintf("Can't make thumbnail, unknown image format %s %s", contentType, link.Link.String))
 		return
 	}
 	resizedImage := resize.Thumbnail(128, 128, image, resize.NearestNeighbor)

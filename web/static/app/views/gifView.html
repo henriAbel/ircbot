@@ -1,3 +1,4 @@
-<div>
-	<img ng-click="gifClick()" ng-src="{{gifUrl}}" alt="{{ngModel.Sender_name}}" title="Sent by: {{ngModel.Sender_name}}" />
+<div class="gif-wrapper">
+	<img ng-src="{{gifUrl}}" alt="{{ngModel.Sender_name}}" title="Sent by: {{ngModel.Sender_name}}" />
+	<div ng-click="gifClick($event)" class="gif-box">GIF</div>
 </div>

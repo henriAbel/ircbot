@@ -24,26 +24,55 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 			ngModel: '=',
 		},
 		link: function(scope, element, attrs) {
-			scope.clicked = false;
+			var showImage = function(e, url) {
+				scope.$parent.showImage(e, {url: url, model: scope.ngModel});
+			}
 			if (scope.ngModel.Link_type == "gif") {
 				scope.contentUrl = formatUrl('/views/gifView.html')
 				scope.gifUrl = getGifUrlFromModel(scope.ngModel, false);
-				scope.gifClick = function() {
-					scope.clicked = !scope.clicked;
-					scope.gifUrl = getGifUrlFromModel(scope.ngModel, scope.clicked);
+				scope.gifClick = function(e) {
+					showImage(e, getGifUrlFromModel(scope.ngModel, true));
 				}	
 			}
 			else if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
 				scope.imageUrl = "/api/raw/" + scope.ngModel.Key + "/thumb"
+				scope.imageClick = function(e) {
+					showImage(e, "/api/raw/" + scope.ngModel.Key + "/full");
+				}
 			}
 			else if (scope.ngModel.Link_type == "youtube") {
+				scope.clicked = false;
 				scope.videoID = getValueFromQuery(scope.ngModel.Link, "v");
 				scope.videoUrl = $sce.trustAsResourceUrl("http://www.youtube.com/embed/" + 
 					 scope.videoID + "?autoplay=1");
 				scope.contentUrl = formatUrl('/views/youtubeView.html')
 				scope.youtubeClick = function() {
 					scope.clicked = !scope.clicked;
+					/*
+						Something goes wrong when using iframe inside ng-if. Iframes
+						are created for a short time and page loading time goes up. No time
+						to search issue, so quick fix is to create iframes dynamically only when 
+						needed.
+					*/
+					if (scope.clicked) {
+						var element = document.getElementById("video-" + scope.videoID);
+						var youtubeFrame = document.createElement("iframe");
+						youtubeFrame.type = "text/html";
+						youtubeFrame.width = 640;
+						youtubeFrame.height = 390;
+						youtubeFrame.src = scope.videoUrl;
+						youtubeFrame.frameborder = 0;
+						youtubeFrame.id = "ytplayer-" + scope.videoID;
+
+						element.parentNode.replaceChild(youtubeFrame, element);
+					}
+					else {
+						var element = document.getElementById("ytplayer-" + scope.videoID);
+						var placeholder = document.createElement("div");
+						placeholder.id = "video-" + scope.videoID;
+						element.parentNode.replaceChild(placeholder, element);
+					}
 				}
 			}
 			else if (scope.ngModel.Link_type == "link") {
