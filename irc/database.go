@@ -244,6 +244,19 @@ func (i *IrcDatabase) setDatabaseVersion(version int) {
 	transaction.Commit()
 }
 
+func (i *IrcDatabase) RemoveLink(link *DBLink) {
+	db := i.Open()
+	defer db.Close()
+	transaction, _ := db.Begin()
+	stmt, err := transaction.Prepare("DELETE FROM irc_raw WHERE link_id = ?")
+	checkErr(err)
+	transaction.Stmt(stmt).Exec(link.Key.Int64)
+	stmt, err = transaction.Prepare("DELETE FROM irc_link WHERE id = ?")
+	checkErr(err)
+	transaction.Stmt(stmt).Exec(link.Key.Int64)
+	transaction.Commit()
+}
+
 func checkErr(err error) {
 	if err != nil {
 		fmt.Println(err)

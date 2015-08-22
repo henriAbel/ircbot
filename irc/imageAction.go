@@ -42,6 +42,8 @@ func (i *imageAction) Image(cs chan *DBLink) {
 	link := <-cs
 	contentType, data, err := download(link.Link.String)
 	if err != nil {
+		i.database.RemoveLink(link)
+		fmt.Println(fmt.Sprintf("Removing dead link %s", link.Link))
 		return
 	}
 	var image image.Image
@@ -49,12 +51,14 @@ func (i *imageAction) Image(cs chan *DBLink) {
 		image, err = png.Decode(bytes.NewReader(data))
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Can't parse image %s", link.Link.String))
+			i.database.RemoveLink(link)
 			return
 		}
 	} else if contentType == "image/jpeg" {
 		image, err = jpeg.Decode(bytes.NewReader(data))
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Can't parse image %s", link.Link.String))
+			i.database.RemoveLink(link)
 			return
 		}
 	} else {
@@ -73,11 +77,14 @@ func (i *imageAction) Gif(cs chan *DBLink) {
 	_, data, err := download(link.Link.String)
 
 	if err != nil {
+		i.database.RemoveLink(link)
+		fmt.Println(fmt.Sprintf("Removing dead link %s", link.Link))
 		return
 	}
 	img, err := gif.DecodeAll(bytes.NewReader(data))
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Can't parse GIF %s", err))
+		i.database.RemoveLink(link)
 		return
 	}
 
@@ -89,9 +96,13 @@ func (i *imageAction) Gif(cs chan *DBLink) {
 
 func download(url string) (string, []byte, error) {
 	response, err := http.Get(url)
-	if err != nil || response.StatusCode != 200 {
+	if err != nil {
 		fmt.Println(fmt.Sprintf("Can't download Image %s err %s", url, err))
 		return "", []byte{}, err
+	}
+	if response.StatusCode != 200 {
+		fmt.Println(fmt.Sprintf("Image returned with wrong status code %s", response.StatusCode))
+		return "", []byte{}, fmt.Errorf("StatusCode %s", response.StatusCode)
 	}
 	defer response.Body.Close()
 	data, err := ioutil.ReadAll(response.Body)
