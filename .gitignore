@@ -1,3 +1,4 @@
+src
 *.db
 *.cfg
 !config.cfg
