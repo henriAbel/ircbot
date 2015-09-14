@@ -32,7 +32,6 @@
  	$scope.showImage = function(e, o) {
  		if (tempObject !== undefined) {
  			$scope.hideImage();
- 			return;
  		}
  		var last = getLastElementInRow(e);
 		tempObject = $compile($templateCache.get('displayBoxTemplate.html'))($scope);

@@ -114,7 +114,8 @@ func (h *Handler) GoogleSearch(query string) {
 	defer res.Body.Close()
 	json, _ := simpleJson.NewFromReader(res.Body)
 	result, _ := json.Get("responseData").Get("results").GetIndex(0).Get("url").String()
-	h.conn.Privmsg(h.channel, result)
+	unescaped, _ := urlLib.QueryUnescape(result)
+	h.conn.Privmsg(h.channel, unescaped)
 }
 
 func EndsWith(a string, list []string) bool {
