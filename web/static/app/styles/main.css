@@ -130,3 +130,7 @@ body {
 .gif-wrapper {
 	position: relative;
 }
+
+.image-list-item img {
+	max-width: 100%;
+}

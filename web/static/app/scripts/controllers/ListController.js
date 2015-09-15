@@ -8,7 +8,7 @@
  	var tempObject;
  	
  	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
- 		$scope.listCount = Math.ceil(o.Count / 30)
+ 		$scope.listCount = Math.ceil(o.Count / $scope.itemsInPage)
  	});
  	
  	$scope.loadNext = function() {
@@ -25,14 +25,17 @@
  	};
 
  	var loadLinks = function() {
- 		$scope.links = LinkProvider.get({filter: f, offset: $scope.offset});
+ 		$scope.links = LinkProvider.get({filter: f, offset: $scope.offset, limit: $scope.itemsInPage});
  		$scope.page = Math.ceil($scope.offset / $scope.itemsInPage) + 1;
  	};
 
  	$scope.showImage = function(e, o) {
  		if (tempObject !== undefined) {
+ 			if (o.model.Key === $scope.displayObject.model.Key) {
+ 				$scope.hideImage();
+ 				return;
+ 			}
  			$scope.hideImage();
- 			return;
  		}
  		var last = getLastElementInRow(e);
 		tempObject = $compile($templateCache.get('displayBoxTemplate.html'))($scope);
