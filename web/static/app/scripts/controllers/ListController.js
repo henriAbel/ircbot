@@ -8,7 +8,7 @@
  	var tempObject;
  	
  	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
- 		$scope.listCount = Math.ceil(o.Count / 30)
+ 		$scope.listCount = Math.ceil(o.Count / $scope.itemsInPage)
  	});
  	
  	$scope.loadNext = function() {
@@ -31,6 +31,10 @@
 
  	$scope.showImage = function(e, o) {
  		if (tempObject !== undefined) {
+ 			if (o.model.Key === $scope.displayObject.model.Key) {
+ 				$scope.hideImage();
+ 				return;
+ 			}
  			$scope.hideImage();
  		}
  		var last = getLastElementInRow(e);

@@ -49,14 +49,21 @@ func (h *Handler) Recv(line string, sender string) {
 	if len(url) > 0 {
 		cs := make(chan *DBLink)
 		var linkType = Link
+		parsedUrl, _ := urlLib.Parse(url)
+		// Modify dropbox urls
+		// TODO Is this good enough??
+		if strings.Contains(url, "dropbox.com/s/") {
+			values := parsedUrl.Query()
+			values.Del("dl")
+			values.Add("raw", "1")
+			url = strings.Replace(url, url[strings.LastIndex(url, "?")+1:], values.Encode(), -1)
+		}
 		if strings.Index(url, "youtube.com/watch") > 0 {
-			parsedUrl, _ := urlLib.Parse(url)
 			query, _ := urlLib.ParseQuery(parsedUrl.RawQuery)
 			h.Youtube(query["v"][0], sender)
 			linkType = Youtube
 
 		} else if strings.Index(url, "://youtu.be/") > 0 {
-			parsedUrl, _ := urlLib.Parse(url)
 			h.Youtube(parsedUrl.Path[1:], sender)
 			linkType = Youtube
 		} else {
@@ -64,7 +71,7 @@ func (h *Handler) Recv(line string, sender string) {
 			if urlSuffix == ".gif" {
 				linkType = Gif
 				go ImageAction.Gif(cs)
-			} else if EndsWith(urlSuffix, Images) {
+			} else if StartsWith(urlSuffix, Images) {
 				linkType = Image
 				go ImageAction.Image(cs)
 			}
@@ -118,7 +125,7 @@ func (h *Handler) GoogleSearch(query string) {
 	h.conn.Privmsg(h.channel, unescaped)
 }
 
-func EndsWith(a string, list []string) bool {
+func StartsWith(a string, list []string) bool {
 	for _, b := range list {
 		if strings.HasPrefix(a, b) {
 			return true
