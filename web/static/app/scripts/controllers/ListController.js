@@ -25,7 +25,7 @@
  	};
 
  	var loadLinks = function() {
- 		$scope.links = LinkProvider.get({filter: f, offset: $scope.offset});
+ 		$scope.links = LinkProvider.get({filter: f, offset: $scope.offset, limit: $scope.itemsInPage});
  		$scope.page = Math.ceil($scope.offset / $scope.itemsInPage) + 1;
  	};
 
