@@ -8,7 +8,7 @@
  	var tempObject;
  	
  	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
- 		$scope.listCount = Math.ceil(o.Count / $scope.itemsInPage)
+ 		$scope.listCount = Math.ceil(o.Count / $scope.itemsInPage);
  	});
  	
  	$scope.loadNext = function() {
@@ -41,28 +41,32 @@
 		tempObject = $compile($templateCache.get('displayBoxTemplate.html'))($scope);
 		last.after(tempObject);
  		$scope.displayObject = o;
- 	}
+ 	};
 
  	$scope.hideImage = function() {
  		$scope.displayObject = undefined;
  		tempObject.remove();
  		tempObject = undefined;
- 	}
+ 	};
 
  	var getLastElementInRow = function(e) {
 		var clickedParent = $(e.target).parents('.image-list-item');
-		var allImages = clickedParent.nextAll(".image-list-item");
+		var allImages = clickedParent.nextAll('.image-list-item');
 		for (var i = 0; i < allImages.length; i++) {
 			if (clickedParent.position().top !== $(allImages[i]).position().top) {
-				if (i == 0) {
+				if (i === 0) {
 					return clickedParent;
 				}
-				 return $(allImages[i-1]);
+				return $(allImages[i-1]);
 			}
 			
-		};
+		}
+
+		if (allImages.length > 0) {
+			return $(allImages[allImages.length-1]);	
+		}
 		return clickedParent;
-	}
+	};
 
  	loadLinks();
  }]);

@@ -6,7 +6,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 			return "/api/raw/" + model.Key + "/gif";
 		}
 		return "/api/raw/" + model.Key + "/gif1";
-	}
+	};
 
 	var getValueFromQuery = function(query, val) {
 		var vars = query.substring(query.indexOf('?') + 1 ).split('&');
@@ -16,7 +16,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 				return decodeURIComponent(pair[1]);
 			}
 		}
-	}
+	};
 
 	return {
 		restrict: 'A',
@@ -26,7 +26,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 		link: function(scope, element, attrs) {
 			var showImage = function(e, url) {
 				scope.$parent.showImage(e, {url: url, model: scope.ngModel});
-			}
+			};
 			if (scope.ngModel.Link_type == "gif") {
 				scope.contentUrl = formatUrl('/views/gifView.html')
 				scope.gifUrl = getGifUrlFromModel(scope.ngModel, false);
@@ -81,8 +81,5 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 		},
 		template: '<div class="content-wrap" ng-include="contentUrl"></div>',
 		replace: true,
-		controller: ['$scope', 'LinkProvider', function($scope, $sce) {
-
-		}],
 	}
 });

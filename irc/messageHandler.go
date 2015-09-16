@@ -84,6 +84,7 @@ func (h *Handler) Recv(line string, sender string) {
 			case cs <- l:
 			default:
 			}
+			close(cs)
 		} else {
 			loc, _ := time.LoadLocation("Europe/Tallinn")
 			h.conn.Privmsg(h.channel, fmt.Sprintf("OLD! Selle on varem saatnud juba %s %s!\n", link.Sender_name.String, link.Date.In(loc).Format("2006-01-02 15:04")))
