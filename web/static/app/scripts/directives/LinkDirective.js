@@ -1,11 +1,18 @@
 'use strict';
 
-angular.module('ircbotApp').directive('ngLink', function($sce) {
+angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
+	/*
+	 * Appends ?authorization={token} to url
+	 */
+	var addToken = function(url) {
+		return url + '?authorization=Bearer ' + $window.sessionStorage.token;
+	}
+
 	var getGifUrlFromModel = function(model, clicked) {
 		if (clicked) {
-			return "/api/raw/" + model.Key + "/gif";
+			return addToken("/api/raw/" + model.Key + "/gif");
 		}
-		return "/api/raw/" + model.Key + "/gif1";
+		return addToken("/api/raw/" + model.Key + "/gif1");
 	};
 
 	var getValueFromQuery = function(query, val) {
@@ -36,9 +43,9 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 			}
 			else if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
-				scope.imageUrl = "/api/raw/" + scope.ngModel.Key + "/thumb"
+				scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/thumb")
 				scope.imageClick = function(e) {
-					showImage(e, "/api/raw/" + scope.ngModel.Key + "/image");
+					showImage(e, addToken("/api/raw/" + scope.ngModel.Key + "/image"));
 				}
 			}
 			else if (scope.ngModel.Link_type == "youtube") {

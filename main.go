@@ -46,6 +46,6 @@ func main() {
 	if err != nil {
 		fmt.Printf("Connection error: %s\n", err)
 	}
-	web.StartWeb()
+	web.StartWeb(conf)
 	<-quit
 }

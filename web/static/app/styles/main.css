@@ -134,3 +134,7 @@ body {
 .image-list-item img {
 	max-width: 100%;
 }
+
+.login-form {
+	margin: 10px;
+}

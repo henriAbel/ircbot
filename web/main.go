@@ -9,25 +9,31 @@ import (
 	"time"
 )
 
-func StartWeb() {
-	irc.GetConfig()
+func StartWeb(config *irc.Config) {
 	jwt_middleware := &jwt.JWTMiddleware{
 		Key:        []byte("VerySecrestKey"),
 		Realm:      "jwt auth",
 		Timeout:    time.Hour,
 		MaxRefresh: time.Hour * 24,
 		Authenticator: func(userId string, password string) bool {
-			return userId == "admin" && password == "admin"
+			return password == config.WebPassword
 		}}
 
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
-	/*api.Use(&rest.IfMiddleware{
+	api.Use(&rest.IfMiddleware{
 		Condition: func(request *rest.Request) bool {
-			return request.URL.Path != "/login"
+			if len(config.WebPassword) > 1 {
+				token := request.Request.URL.Query()["authorization"]
+				if len(token) > 0 {
+					request.Header.Add("Authorization", token[0])
+				}
+				return request.URL.Path != "/login"
+			}
+			return false
 		},
 		IfTrue: jwt_middleware,
-	})*/
+	})
 
 	service := NewLinkService()
 
