@@ -26,7 +26,7 @@ func StartWeb(config *irc.Config) {
 			if len(config.WebPassword) > 1 {
 				token := request.Request.URL.Query()["authorization"]
 				if len(token) > 0 {
-					request.Header.Add("Authorization", token[0])
+					request.Header.Add("Authorization", "Bearer " + token[0])
 				}
 				return request.URL.Path != "/login"
 			}

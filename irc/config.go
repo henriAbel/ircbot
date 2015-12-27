@@ -18,7 +18,8 @@ type Config struct {
 	LogFile,
 	DBFile,
 	YoutubeApiKey,
-	WebPassword string
+	WebPassword,
+	DataPath string
 	Port                   int
 	Ssl, AcceptInvalidCert bool
 }

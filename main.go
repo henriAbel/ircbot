@@ -15,10 +15,18 @@ func main() {
 		os.Exit(3)
 	}
 	conf := irc.Read(os.Args[1])
+
+	CheckAndCreate(conf.DataPath)
+	CheckAndCreate(conf.DataPath + "/thumb")
+	CheckAndCreate(conf.DataPath + "/image")
+	CheckAndCreate(conf.DataPath + "/gif")
+	CheckAndCreate(conf.DataPath + "/webm")
+
 	cfg := client.NewConfig(conf.BotName)
 	cfg.SSL = conf.Ssl
 	cfg.Server = fmt.Sprintf("%s:%d", conf.Server, conf.Port)
 	cfg.Pass = conf.ServerPassword
+
 	c := client.Client(cfg)
 	handler := irc.NewHandler(c, conf.Channel)
 
@@ -48,4 +56,10 @@ func main() {
 	}
 	web.StartWeb(conf)
 	<-quit
+}
+
+func CheckAndCreate(path string) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModePerm)
+	}
 }

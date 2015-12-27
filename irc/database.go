@@ -25,19 +25,17 @@ type DBUser struct {
 
 type DBRaw struct {
 	Mime_type sql.NullString
-	Data      []byte
 	Link_id   sql.NullInt64
 	Data_type sql.NullString
 }
 
 // Those strings are used in database type fields
 const (
-	Duplicate = "Duplicate"
-	// Gif first frame as jpeg image
-	RawGifFrame       = "gif1"
-	RawGif            = "gif"
+	Duplicate         = "Duplicate"
 	RawImage          = "image"
 	RawImageThumbnail = "thumb"
+	RawWebm           = "webm"
+	RawWebmFrame      = "webm1"
 	database_version  = 1
 )
 
@@ -86,8 +84,7 @@ func (i *IrcDatabase) create(db *sql.DB) {
 			id integer PRIMARY KEY,
 			link_id integer NOT NULL,
 			data_type varchar(255) NOT NULL,
-			mime_type varchar(255) NOT NULL,
-			data BLOB
+			mime_type varchar(255) NOT NULL
 		)`)
 	db.Exec("CREATE UNIQUE INDEX IF NOT EXISTS irc_raw_link_id_type_index ON irc_raw(link_id, data_type)")
 	/*current_version := i.GetDatabaseVersion()
@@ -169,21 +166,25 @@ func (i *IrcDatabase) LogDuplicate(link *DBLink, sender string) {
 	transaction.Commit()
 }
 
-func (i *IrcDatabase) AddRaw(dataType string, link *DBLink, mime_type string, data []byte) {
+func (i *IrcDatabase) AddRaw(dataType string, link *DBLink, mime_type string) int64 {
 	db := i.Open()
 	defer db.Close()
 	transaction, _ := db.Begin()
-	stmt, err := transaction.Prepare("INSERT INTO irc_raw(link_id, data_type, mime_type, data) VALUES (?,?,?,?)")
+	stmt, err := transaction.Prepare("INSERT INTO irc_raw(link_id, data_type, mime_type) VALUES (?,?,?)")
 	checkErr(err)
-	transaction.Stmt(stmt).Exec(link.Key.Int64, dataType, mime_type, data)
+	res, err := transaction.Stmt(stmt).Exec(link.Key.Int64, dataType, mime_type)
+	checkErr(err)
 	transaction.Commit()
+	id, err := res.LastInsertId()
+	checkErr(err)
+	return id
 }
 
 func (i *IrcDatabase) GetAll(limit int, offset int, link_types []string) *[]DBLink {
 	db := i.Open()
 	defer db.Close()
 	if len(link_types) == 0 {
-		link_types = []string{Image, Gif, Link, Youtube}
+		link_types = []string{Image, Link, Youtube, WebM}
 	}
 
 	params := string_to_interface(&link_types)
@@ -208,7 +209,7 @@ func (i *IrcDatabase) GetCount(link_types []string) int {
 	db := i.Open()
 	defer db.Close()
 	if len(link_types) == 0 {
-		link_types = []string{Image, Gif, Link, Youtube}
+		link_types = []string{Image, Link, Youtube, WebM}
 	}
 
 	params := string_to_interface(&link_types)
@@ -218,13 +219,13 @@ func (i *IrcDatabase) GetCount(link_types []string) int {
 	return count
 }
 
-func (i *IrcDatabase) GetRaw(linkId int64, rawType string) *DBRaw {
+func (i *IrcDatabase) GetRaw(linkId int64, rawType string) (*DBRaw, error) {
 	db := i.Open()
 	defer db.Close()
-	row := db.QueryRow("SELECT mime_type, data, link_id, data_type FROM irc_raw WHERE link_id = ? AND data_type = ?", linkId, rawType)
+	row := db.QueryRow("SELECT mime_type, link_id, data_type FROM irc_raw WHERE link_id = ? AND data_type = ?", linkId, rawType)
 	var raw = DBRaw{}
-	row.Scan(&raw.Mime_type, &raw.Data, &raw.Link_id, &raw.Data_type)
-	return &raw
+	err := row.Scan(&raw.Mime_type, &raw.Link_id, &raw.Data_type)
+	return &raw, err
 }
 
 func (i *IrcDatabase) GetDatabaseVersion() int {

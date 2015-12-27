@@ -3,7 +3,9 @@ package web
 import (
 	irc "../irc"
 	"github.com/ant0ine/go-json-rest/rest"
+	"io/ioutil"
 	"net/http"
+	"path"
 	"strconv"
 	"strings"
 	"sync"
@@ -100,17 +102,27 @@ func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, "Can't parse resource id", 400)
 		return
 	}
+	data := []byte{}
 
-	l.Lock()
-	rawData := l.database.GetRaw(resourceId, resourceType)
-	l.Unlock()
-	if len(rawData.Data) == 0 {
+	switch resourceType {
+	case irc.RawImage:
+		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "image", r.PathParam("id")))
+	case irc.RawImageThumbnail:
+		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+	case irc.RawWebm:
+		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "webm", r.PathParam("id")))
+	case irc.RawWebmFrame:
+		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+	}
+
+	dbRaw, err := l.database.GetRaw(resourceId, resourceType)
+	if len(data) == 0 {
 		link := l.database.GetLinkById(resourceId)
-		w.Header().Set("Location", link.Link.String)
-		w.WriteHeader(303)
+		w.WriteHeader(404)
+		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
 		irc.ImageAction.CheckImage(link)
 	} else {
-		w.Header().Set("Content-Type", rawData.Mime_type.String)
-		w.(http.ResponseWriter).Write(rawData.Data)
+		w.Header().Set("Content-Type", dbRaw.Mime_type.String)
+		w.(http.ResponseWriter).Write(data)
 	}
 }

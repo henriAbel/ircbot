@@ -5,15 +5,9 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 	 * Appends ?authorization={token} to url
 	 */
 	var addToken = function(url) {
-		return url + '?authorization=Bearer ' + $window.sessionStorage.token;
+		if ($window.sessionStorage.token === undefined) return url;
+		return url + '?authorization=' + $window.sessionStorage.token;
 	}
-
-	var getGifUrlFromModel = function(model, clicked) {
-		if (clicked) {
-			return addToken("/api/raw/" + model.Key + "/gif");
-		}
-		return addToken("/api/raw/" + model.Key + "/gif1");
-	};
 
 	var getValueFromQuery = function(query, val) {
 		var vars = query.substring(query.indexOf('?') + 1 ).split('&');
@@ -34,14 +28,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 			var showImage = function(e, url) {
 				scope.$parent.showImage(e, {url: url, model: scope.ngModel});
 			};
-			if (scope.ngModel.Link_type == "gif") {
-				scope.contentUrl = formatUrl('/views/gifView.html')
-				scope.gifUrl = getGifUrlFromModel(scope.ngModel, false);
-				scope.gifClick = function(e) {
-					showImage(e, getGifUrlFromModel(scope.ngModel, true));
-				}	
-			}
-			else if (scope.ngModel.Link_type == "image") {
+			if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
 				scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/thumb")
 				scope.imageClick = function(e) {
@@ -83,7 +70,12 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 				}
 			}
 			else if (scope.ngModel.Link_type == "link") {
-				scope.contentUrl = formatUrl('/views/linkView.html')
+				scope.contentUrl = formatUrl('/views/linkView.html');
+			}
+			else if (scope.ngModel.Link_type == "webm") {
+				scope.contentUrl = formatUrl('/views/webmView.html');
+				scope.thumbUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm1");
+				scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm");
 			}
 		},
 		template: '<div class="content-wrap" ng-include="contentUrl"></div>',

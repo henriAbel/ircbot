@@ -8,7 +8,7 @@
  	var tempObject;
  	
  	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
- 		$scope.listCount = Math.ceil(o.Count / $scope.itemsInPage);
+ 		$scope.listCount = o.Count == 0 ? 1 : Math.ceil(o.Count / $scope.itemsInPage);
  	});
  	
  	$scope.loadNext = function() {

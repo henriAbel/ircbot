@@ -109,24 +109,6 @@ body {
 	color: white;
 }
 
-.gif-box {
-	background-color: rgba(0,0,0,0.4);
-	line-height: 200px;
-	position: absolute;
-	top: 0;
-	height: 100%;
-	width: 100%;
-
-	text-shadow: -1px -1px 1px #fff, 1px 1px 1px #000;
-	color: #fff;
-	opacity: 0.9;
-	font: 40px 'Museo700';	
-}
-
-.gif-box:hover {
-	opacity: 0;
-}
-
 .gif-wrapper {
 	position: relative;
 }
@@ -137,4 +119,17 @@ body {
 
 .login-form {
 	margin: 10px;
+}
+
+.list-image {
+	-webkit-transition: opacity .5s ease-in-out;
+	-moz-transition: opacity .5s ease-in-out;
+	-o-transition: opacity .5s ease-in-out;
+	transition: opacity .5s ease-in-out;
+}
+
+.list-image-hidden {
+	opacity: 0;
+	width: 0;
+	height: 0;
 }

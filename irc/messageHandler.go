@@ -15,9 +15,9 @@ var Images = []string{".jpg", ".png", ".jpeg"}
 
 const (
 	Image   = "image"
-	Gif     = "gif"
 	Link    = "link"
 	Youtube = "youtube"
+	WebM    = "webm"
 )
 
 type Handler struct {
@@ -69,7 +69,8 @@ func (h *Handler) Recv(line string, sender string) {
 		} else {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
-				linkType = Gif
+				linkType = WebM
+				// Gifs are converted to webm
 				go ImageAction.Gif(cs)
 			} else if StartsWith(urlSuffix, Images) {
 				linkType = Image

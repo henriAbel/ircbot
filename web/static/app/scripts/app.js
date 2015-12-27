@@ -15,7 +15,7 @@ angular
 				templateUrl: 'views/list.html',
 				controller: 'ListController',
 				resolve: {
-					filter: function(){return 'image,gif';}
+					filter: function(){return 'image';}
 				}
 			})
 			.when('/links/', {
@@ -30,6 +30,13 @@ angular
 				controller: 'ListController',
 				resolve: {
 					filter: function(){return 'youtube';}
+				}
+			})
+			.when('/video/', {
+				templateUrl: 'views/list.html',
+				controller: 'ListController',
+				resolve: {
+					filter: function(){return 'webm';}
 				}
 			})
 			.when('/login/', {
