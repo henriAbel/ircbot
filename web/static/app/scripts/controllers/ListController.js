@@ -24,6 +24,15 @@
 		loadLinks();
  	};
 
+ 	$scope.$on('keypress', function(event, e) {
+ 		if(e.which == 39) {
+ 			$scope.loadNext();
+ 		} 
+ 		else if (e.which == 37) {
+ 			$scope.loadPrev()
+ 		}
+ 	});
+
  	var loadLinks = function() {
  		$scope.links = LinkProvider.get({filter: f, offset: $scope.offset, limit: $scope.itemsInPage});
  		$scope.page = Math.ceil($scope.offset / $scope.itemsInPage) + 1;

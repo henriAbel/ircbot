@@ -16,7 +16,6 @@ angular.module('ircbotApp').directive('ngErr', ['$interval', '$timeout', functio
 			})
 			element.bind('load', function() {
 				$interval.cancel(element.data('interval'));
-				console.log('onLoad')
 				element.next().remove()
 				// Fixes 99% cases where Chrome isn't animating opacity 0 > 100
 				$timeout(function() {

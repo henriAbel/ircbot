@@ -141,8 +141,7 @@ func (i *imageAction) Gif(cs chan *DBLink) {
 		framePath := path.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 		if notExists(link.Key.Int64, "webm") {
 			ioutil.WriteFile(filePath, data, os.ModePerm)
-			exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -c:v libvpx -crf 12 -b:v 500k -f webm %s && rm %s", filePath, outPath, filePath)).Output()
-			exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -f image2 -ss 00 -vframes 1 %s", outPath, framePath)).Output()
+			gifToWebM(filePath, outPath, framePath)
 			if notExists(link.Key.Int64, "thumb") {
 				i.database.RemoveLink(link)
 				os.Remove(filePath)
@@ -202,6 +201,24 @@ func (i *imageAction) Download(url string) (string, []byte, error) {
 	data, err := ioutil.ReadAll(response.Body)
 	response.Body.Close()
 	return response.Header.Get("Content-Type"), data, err
+}
+
+// Checks if there are unconverted gifs, missing thumbnails etc
+func (i *imageAction) StartupCheck() {
+	// Check unconverted gifs
+	arr, _ := ioutil.ReadDir(path.Join(GetConfig().DataPath, "gif"))
+	for _, t := range arr {
+		filePath := path.Join(GetConfig().DataPath, "/gif/", t.Name())
+		outPath := path.Join(GetConfig().DataPath, "/webm/", t.Name())
+		framePath := path.Join(GetConfig().DataPath, "/thumb/", t.Name())
+		gifToWebM(filePath, outPath, framePath)
+	}
+	// TODO check missing thumbnails
+}
+
+func gifToWebM(filePath, outPath, framePath string) {
+	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -c:v libvpx -crf 12 -b:v 500k -f webm %s && rm %s", filePath, outPath, filePath)).Output()
+	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -f image2 -ss 00 -vframes 1 %s", outPath, framePath)).Output()
 }
 
 func notExists(id int64, fileType string) bool {

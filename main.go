@@ -54,6 +54,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("Connection error: %s\n", err)
 	}
+	go irc.ImageAction.StartupCheck()
 	web.StartWeb(conf)
 	<-quit
 }

@@ -118,7 +118,7 @@ func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 	dbRaw, err := l.database.GetRaw(resourceId, resourceType)
 	if len(data) == 0 {
 		link := l.database.GetLinkById(resourceId)
-		w.WriteHeader(404)
+		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
 		irc.ImageAction.CheckImage(link)
 	} else {

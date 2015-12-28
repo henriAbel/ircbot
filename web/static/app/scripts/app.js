@@ -47,6 +47,11 @@ angular
 				redirectTo: '/'
 			});
 		$httpProvider.interceptors.push('AuthInterceptor');
+	}])
+	.run(['$document', '$rootScope', function($document, $rootScope) {
+		$document.bind('keyup', function(e) {
+			$rootScope.$broadcast('keypress', e);
+		});
 	}]);
 
 
