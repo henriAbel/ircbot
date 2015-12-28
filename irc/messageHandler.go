@@ -18,6 +18,7 @@ const (
 	Link    = "link"
 	Youtube = "youtube"
 	WebM    = "webm"
+	Gif     = "gif"
 )
 
 type Handler struct {
@@ -69,12 +70,14 @@ func (h *Handler) Recv(line string, sender string) {
 		} else {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
-				linkType = WebM
-				// Gifs are converted to webm
+				linkType = Gif
 				go ImageAction.Gif(cs)
 			} else if StartsWith(urlSuffix, Images) {
 				linkType = Image
 				go ImageAction.Image(cs)
+			} else if urlSuffix == ".webm" {
+				linkType = WebM
+				go ImageAction.WebM(cs)
 			}
 		}
 

@@ -72,7 +72,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 			else if (scope.ngModel.Link_type == "link") {
 				scope.contentUrl = formatUrl('/views/linkView.html');
 			}
-			else if (scope.ngModel.Link_type == "webm") {
+			else if (scope.ngModel.Link_type == "webm" || scope.ngModel.Link_type == "gif") {
 				scope.contentUrl = formatUrl('/views/webmView.html');
 				scope.thumbUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm1");
 				scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm");

@@ -115,13 +115,13 @@ func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
 	}
 
-	dbRaw, err := l.database.GetRaw(resourceId, resourceType)
 	if len(data) == 0 {
 		link := l.database.GetLinkById(resourceId)
 		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
 		irc.ImageAction.CheckImage(link)
 	} else {
+		dbRaw, _ := l.database.GetRaw(resourceId, resourceType)
 		w.Header().Set("Content-Type", dbRaw.Mime_type.String)
 		w.(http.ResponseWriter).Write(data)
 	}

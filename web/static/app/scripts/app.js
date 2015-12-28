@@ -36,7 +36,7 @@ angular
 				templateUrl: 'views/list.html',
 				controller: 'ListController',
 				resolve: {
-					filter: function(){return 'webm';}
+					filter: function(){return 'webm,gif';}
 				}
 			})
 			.when('/login/', {

@@ -8,7 +8,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -78,6 +80,14 @@ func (i *imageAction) checkImage(link *DBLink) {
 		if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
 			i.webmCh <- link
 		}
+	case Gif:
+		if _, err := i.database.GetRaw(link.Key.Int64, RawGif); err != nil {
+			i.gifCh <- link
+		} else if notExists(link.Key.Int64, "webm") {
+			i.gifCh <- link
+		} else if notExists(link.Key.Int64, "thumb") {
+			i.gifCh <- link
+		}
 	}
 }
 
@@ -104,15 +114,13 @@ func (i *imageAction) Image(cs chan *DBLink) {
 			filePath := path.Join(GetConfig().DataPath, "image", strconv.FormatInt(link.Key.Int64, 10))
 			thumbPath := path.Join(GetConfig().DataPath, "thumb") + "/"
 			thumbFilePath := path.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
-			if notExists(link.Key.Int64, "image") {
-				ioutil.WriteFile(filePath, data, os.ModePerm)
-				exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
-					thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
-				if notExists(link.Key.Int64, "thumb") {
-					i.database.RemoveLink(link)
-					os.Remove(filePath)
-					fmt.Println(fmt.Sprintf("Cannot make thumbnail %s", link.Link.String))
-				}
+			ioutil.WriteFile(filePath, data, os.ModePerm)
+			exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
+				thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
+			if notExists(link.Key.Int64, "thumb") {
+				i.database.RemoveLink(link)
+				os.Remove(filePath)
+				fmt.Println(fmt.Sprintf("Cannot make thumbnail %s", link.Link.String))
 			}
 		} else {
 			fmt.Println(fmt.Sprintf("Can't make thumbnail, unknown image format %s %s", contentType, link.Link.String))
@@ -136,18 +144,16 @@ func (i *imageAction) Gif(cs chan *DBLink) {
 			i.database.AddRaw(RawWebmFrame, link, "image/jpeg")
 		}
 
-		filePath := path.Join(GetConfig().DataPath, "/gif/", strconv.FormatInt(link.Key.Int64, 10))
+		filePath := path.Join(GetConfig().DataPath, "/gif/", strconv.FormatInt(link.Key.Int64, 10)) + ".gif"
 		outPath := path.Join(GetConfig().DataPath, "/webm/", strconv.FormatInt(link.Key.Int64, 10))
 		framePath := path.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
-		if notExists(link.Key.Int64, "webm") {
-			ioutil.WriteFile(filePath, data, os.ModePerm)
-			gifToWebM(filePath, outPath, framePath)
-			if notExists(link.Key.Int64, "thumb") {
-				i.database.RemoveLink(link)
-				os.Remove(filePath)
-				os.Remove(outPath)
-				fmt.Println(fmt.Sprintf("Cannot convert GIF -> WEBM %s", link.Link.String))
-			}
+		ioutil.WriteFile(filePath, data, os.ModePerm)
+		gifToWebM(filePath, outPath, framePath)
+		if notExists(link.Key.Int64, "thumb") {
+			i.database.RemoveLink(link)
+			os.Remove(filePath)
+			os.Remove(outPath)
+			fmt.Println(fmt.Sprintf("Cannot convert GIF -> WEBM %s", link.Link.String))
 		}
 	}
 }
@@ -173,14 +179,12 @@ func (i *imageAction) WebM(cs chan *DBLink) {
 
 		filePath := path.Join(GetConfig().DataPath, "/webm/", strconv.FormatInt(link.Key.Int64, 10))
 		framePath := path.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
-		if notExists(link.Key.Int64, "webm") {
-			ioutil.WriteFile(filePath, data, os.ModePerm)
-			exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
-			if notExists(link.Key.Int64, "thumb") {
-				i.database.RemoveLink(link)
-				os.Remove(filePath)
-				fmt.Println(fmt.Sprintf("Invalid WebM %s", link.Link.String))
-			}
+		ioutil.WriteFile(filePath, data, os.ModePerm)
+		exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+		if notExists(link.Key.Int64, "thumb") {
+			i.database.RemoveLink(link)
+			os.Remove(filePath)
+			fmt.Println(fmt.Sprintf("Invalid WebM %s", link.Link.String))
 		}
 	}
 }
@@ -208,17 +212,18 @@ func (i *imageAction) StartupCheck() {
 	// Check unconverted gifs
 	arr, _ := ioutil.ReadDir(path.Join(GetConfig().DataPath, "gif"))
 	for _, t := range arr {
+		baseName := strings.TrimSuffix(t.Name(), filepath.Ext(t.Name()))
 		filePath := path.Join(GetConfig().DataPath, "/gif/", t.Name())
-		outPath := path.Join(GetConfig().DataPath, "/webm/", t.Name())
-		framePath := path.Join(GetConfig().DataPath, "/thumb/", t.Name())
+		outPath := path.Join(GetConfig().DataPath, "/webm/", baseName)
+		framePath := path.Join(GetConfig().DataPath, "/thumb/", baseName)
 		gifToWebM(filePath, outPath, framePath)
 	}
 	// TODO check missing thumbnails
 }
 
 func gifToWebM(filePath, outPath, framePath string) {
-	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -c:v libvpx -crf 12 -b:v 500k -f webm %s && rm %s", filePath, outPath, filePath)).Output()
-	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -i %s -f image2 -ss 00 -vframes 1 %s", outPath, framePath)).Output()
+	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -c:v libvpx -crf 12 -b:v 500k -f webm %s && rm %s", filePath, outPath, filePath)).Output()
+	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", outPath, framePath)).Output()
 }
 
 func notExists(id int64, fileType string) bool {

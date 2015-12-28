@@ -13,7 +13,7 @@ angular.module('ircbotApp').directive('ngErr', ['$interval', '$timeout', functio
 					}, 5000);
 					element.data('interval', interval);	
 				}
-			})
+			});
 			element.bind('load', function() {
 				$interval.cancel(element.data('interval'));
 				element.next().remove()
@@ -22,7 +22,12 @@ angular.module('ircbotApp').directive('ngErr', ['$interval', '$timeout', functio
 					element.removeClass('list-image-hidden')	
 				}, 50);
 				
-			})
+			});
+			element.on('$destroy', function() {
+				if (element.data('interval') !== undefined) {
+					$interval.cancel(element.data('interval'));
+				}
+			});
 		}
 	}
 }]);

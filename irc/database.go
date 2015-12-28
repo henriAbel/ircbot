@@ -36,6 +36,7 @@ const (
 	RawImageThumbnail = "thumb"
 	RawWebm           = "webm"
 	RawWebmFrame      = "webm1"
+	RawGif            = "gif"
 	database_version  = 1
 )
 
