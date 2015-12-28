@@ -1,5 +1,7 @@
 'use strict';
 
+var loginUrl = '/api/login';
+
 angular
 	.module('ircbotApp', [
 		'ngAnimate',
@@ -7,35 +9,47 @@ angular
 		'ngRoute',
 		'ngSanitize'
 	])
-	.config(function ($routeProvider) {
+	.config(['$routeProvider', '$httpProvider', function ($routeProvider, $httpProvider) {
 		$routeProvider
 			.when('/', {
 				templateUrl: 'views/list.html',
 				controller: 'ListController',
 				resolve: {
-					filter: function(){return 'image,gif'}
+					filter: function(){return 'image';}
 				}
 			})
 			.when('/links/', {
 				templateUrl: 'views/list.html',
 				controller: 'ListController',
 				resolve: {
-					filter: function(){return 'link'}
+					filter: function(){return 'link';}
 				}
 			})
 			.when('/youtube/', {
 				templateUrl: 'views/list.html',
 				controller: 'ListController',
 				resolve: {
-					filter: function(){return 'youtube'}
+					filter: function(){return 'youtube';}
 				}
+			})
+			.when('/video/', {
+				templateUrl: 'views/list.html',
+				controller: 'ListController',
+				resolve: {
+					filter: function(){return 'webm';}
+				}
+			})
+			.when('/login/', {
+				templateUrl: 'login.html',
+				controller: 'LoginController'
 			})
 			.otherwise({
 				redirectTo: '/'
 			});
-	});
+		$httpProvider.interceptors.push('AuthInterceptor');
+	}]);
 
 
 var formatUrl = function(url) {
 	return url;	
-}
+};

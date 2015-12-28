@@ -17,7 +17,9 @@ type Config struct {
 	BotName,
 	LogFile,
 	DBFile,
-	YoutubeApiKey string
+	YoutubeApiKey,
+	WebPassword,
+	DataPath string
 	Port                   int
 	Ssl, AcceptInvalidCert bool
 }

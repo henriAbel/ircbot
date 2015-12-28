@@ -1,11 +1,12 @@
 'use strict';
 
-angular.module('ircbotApp').directive('ngLink', function($sce) {
-	var getGifUrlFromModel = function(model, clicked) {
-		if (clicked) {
-			return "/api/raw/" + model.Key + "/gif";
-		}
-		return "/api/raw/" + model.Key + "/gif1";
+angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
+	/*
+	 * Appends ?authorization={token} to url
+	 */
+	var addToken = function(url) {
+		if ($window.sessionStorage.token === undefined) return url;
+		return url + '?authorization=' + $window.sessionStorage.token;
 	}
 
 	var getValueFromQuery = function(query, val) {
@@ -16,7 +17,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 				return decodeURIComponent(pair[1]);
 			}
 		}
-	}
+	};
 
 	return {
 		restrict: 'A',
@@ -26,19 +27,12 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 		link: function(scope, element, attrs) {
 			var showImage = function(e, url) {
 				scope.$parent.showImage(e, {url: url, model: scope.ngModel});
-			}
-			if (scope.ngModel.Link_type == "gif") {
-				scope.contentUrl = formatUrl('/views/gifView.html')
-				scope.gifUrl = getGifUrlFromModel(scope.ngModel, false);
-				scope.gifClick = function(e) {
-					showImage(e, getGifUrlFromModel(scope.ngModel, true));
-				}	
-			}
-			else if (scope.ngModel.Link_type == "image") {
+			};
+			if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
-				scope.imageUrl = "/api/raw/" + scope.ngModel.Key + "/thumb"
+				scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/thumb")
 				scope.imageClick = function(e) {
-					showImage(e, "/api/raw/" + scope.ngModel.Key + "/image");
+					showImage(e, addToken("/api/raw/" + scope.ngModel.Key + "/image"));
 				}
 			}
 			else if (scope.ngModel.Link_type == "youtube") {
@@ -76,13 +70,15 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 				}
 			}
 			else if (scope.ngModel.Link_type == "link") {
-				scope.contentUrl = formatUrl('/views/linkView.html')
+				scope.contentUrl = formatUrl('/views/linkView.html');
+			}
+			else if (scope.ngModel.Link_type == "webm") {
+				scope.contentUrl = formatUrl('/views/webmView.html');
+				scope.thumbUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm1");
+				scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm");
 			}
 		},
 		template: '<div class="content-wrap" ng-include="contentUrl"></div>',
 		replace: true,
-		controller: ['$scope', 'LinkProvider', function($scope, $sce) {
-
-		}],
 	}
 });

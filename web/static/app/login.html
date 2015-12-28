@@ -1,0 +1,16 @@
+<div class="login-form">
+	<h2 class="text-center">Login</h2>
+	<form role="form" ng-submit="login(password)">
+		<fieldset>
+			<div class="form-group">
+				<label for="login-password">Password</label>
+				<input id="login-password" type="password" ng-model="password" class="ng-pristine ng-valid form-control">
+			</div>
+			<p class="bg-warning error-message" ng-show="loginError">{{loginError}}</p>
+			<button class="btn btn-primary" ng-class="{disabled: loading}">
+				<span ng-show="loading">Loading ...</span>
+				<span ng-hide="loading">Enter</span>
+			</button>
+		</fieldset>
+	</form>
+</div>
