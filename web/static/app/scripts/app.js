@@ -54,7 +54,15 @@ angular
 		});
 	}]);
 
-
+// TODO Remove??
 var formatUrl = function(url) {
-	return url;	
+	return url;
 };
+
+/*
+ * Appends ?authorization={token} to url
+ */
+var addToken = function(url) {
+	if (window.sessionStorage.token === undefined) return url;
+	return url + '?authorization=' + window.sessionStorage.token;
+}

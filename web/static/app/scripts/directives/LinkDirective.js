@@ -1,14 +1,6 @@
 'use strict';
 
-angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
-	/*
-	 * Appends ?authorization={token} to url
-	 */
-	var addToken = function(url) {
-		if ($window.sessionStorage.token === undefined) return url;
-		return url + '?authorization=' + $window.sessionStorage.token;
-	}
-
+angular.module('ircbotApp').directive('ngLink', function($sce) {
 	var getValueFromQuery = function(query, val) {
 		var vars = query.substring(query.indexOf('?') + 1 ).split('&');
 		for (var i = 0; i < vars.length; i++) {
@@ -38,7 +30,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 			else if (scope.ngModel.Link_type == "youtube") {
 				scope.clicked = false;
 				scope.videoID = getValueFromQuery(scope.ngModel.Link, "v");
-				scope.videoUrl = $sce.trustAsResourceUrl("http://www.youtube.com/embed/" + 
+				scope.videoUrl = $sce.trustAsResourceUrl("http://www.youtube.com/embed/" +
 					 scope.videoID + "?autoplay=1");
 				scope.contentUrl = formatUrl('/views/youtubeView.html')
 				scope.youtubeClick = function() {
@@ -46,7 +38,7 @@ angular.module('ircbotApp').directive('ngLink', function($sce, $window) {
 					/*
 						Something goes wrong when using iframe inside ng-if. Iframes
 						are created for a short time and page loading time goes up. No time
-						to search issue, so quick fix is to create iframes dynamically only when 
+						to search issue, so quick fix is to create iframes dynamically only when
 						needed.
 					*/
 					if (scope.clicked) {

@@ -2,3 +2,5 @@ src
 *.db
 *.cfg
 !config.cfg
+/pkg/
+/bin/

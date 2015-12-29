@@ -87,8 +87,13 @@ body {
 	padding: 10px 0;
 }
 
+.image-list-item {
+	width: 136px;
+	height: 136px;
+}
+
 .image-list-item img {
-	max-width: 340px;
+	max-width: 100%;
 	max-height: 200px;
 }
 
@@ -111,10 +116,6 @@ body {
 
 .gif-wrapper {
 	position: relative;
-}
-
-.image-list-item img {
-	max-width: 100%;
 }
 
 .login-form {

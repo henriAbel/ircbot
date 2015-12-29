@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -111,19 +111,26 @@ func (i *imageAction) Image(cs chan *DBLink) {
 			if contentType == "image/png" {
 				imgType = "png"
 			}
-			filePath := path.Join(GetConfig().DataPath, "image", strconv.FormatInt(link.Key.Int64, 10))
-			thumbPath := path.Join(GetConfig().DataPath, "thumb") + "/"
-			thumbFilePath := path.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
+
+			filePath := filepath.Join(GetConfig().DataPath, "image", strconv.FormatInt(link.Key.Int64, 10))
+			thumbPath := filepath.Join(GetConfig().DataPath, "thumb") + "/"
+			thumbFilePath := filepath.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
 			ioutil.WriteFile(filePath, data, os.ModePerm)
-			exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
-				thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
+			if runtime.GOOS == "windows" {
+				exec.Command("cmd", "/c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s & rename %s *. ",
+					thumbPath, imgType, filePath, thumbFilePath)).Output()
+			} else {
+				exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
+					thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
+			}
 			if notExists(link.Key.Int64, "thumb") {
 				i.database.RemoveLink(link)
 				os.Remove(filePath)
-				fmt.Println(fmt.Sprintf("Cannot make thumbnail %s", link.Link.String))
+				fmt.Println(fmt.Sprintf("Can't make thumbnail %s", link.Link.String))
 			}
 		} else {
 			fmt.Println(fmt.Sprintf("Can't make thumbnail, unknown image format %s %s", contentType, link.Link.String))
+			i.database.RemoveLink(link)
 			continue
 		}
 	}
@@ -199,8 +206,8 @@ func (i *imageAction) Download(url string) (string, []byte, error) {
 		return "", []byte{}, err
 	}
 	if response.StatusCode != 200 {
-		fmt.Println(fmt.Sprintf("Image returned with wrong status code %s", response.StatusCode))
-		return "", []byte{}, fmt.Errorf("StatusCode %s", response.StatusCode)
+		fmt.Println(fmt.Sprintf("Image returned with wrong status code %d", response.StatusCode))
+		return "", []byte{}, fmt.Errorf("StatusCode %d", response.StatusCode)
 	}
 	data, err := ioutil.ReadAll(response.Body)
 	response.Body.Close()
