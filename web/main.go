@@ -1,12 +1,14 @@
 package web
 
 import (
-	irc "../irc"
-	"github.com/StephanDollberg/go-json-rest-middleware-jwt"
-	"github.com/ant0ine/go-json-rest/rest"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	irc "../irc"
+	"github.com/StephanDollberg/go-json-rest-middleware-jwt"
+	"github.com/ant0ine/go-json-rest/rest"
 )
 
 func StartWeb(config *irc.Config) {
@@ -26,7 +28,7 @@ func StartWeb(config *irc.Config) {
 			if len(config.WebPassword) > 1 {
 				token := request.Request.URL.Query()["authorization"]
 				if len(token) > 0 {
-					request.Header.Add("Authorization", "Bearer " + token[0])
+					request.Header.Add("Authorization", "Bearer "+token[0])
 				}
 				return request.URL.Path != "/login"
 			}
@@ -49,5 +51,6 @@ func StartWeb(config *irc.Config) {
 	http.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
 	http.Handle("/bower_components/", http.FileServer(http.Dir("./web/static/")))
 	http.Handle("/", http.FileServer(http.Dir("./web/static/app/")))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	listeningPort := fmt.Sprintf(":%d", irc.GetConfig().WebPort)
+	log.Fatal(http.ListenAndServe(listeningPort, nil))
 }

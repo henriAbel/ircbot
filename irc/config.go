@@ -20,7 +20,8 @@ type Config struct {
 	YoutubeApiKey,
 	WebPassword,
 	DataPath string
-	Port                   int
+	Port,
+	WebPort int
 	Ssl, AcceptInvalidCert bool
 }
 
