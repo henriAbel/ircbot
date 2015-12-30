@@ -68,8 +68,7 @@ func (i *imageAction) CheckLink(link *DBLink) {
 	case WebM:
 		if _, err := i.database.GetRaw(link.Key.Int64, RawWebm); err != nil {
 			i.WebM(link)
-		}
-		if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
+		} else if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
 			i.WebM(link)
 		}
 	case Gif:
@@ -172,10 +171,20 @@ func (i *imageAction) Gif(link *DBLink) {
 }
 
 func (i *imageAction) WebM(link *DBLink) {
-	_, data, err := i.Download(link.Link.String)
+	log.WithFields(log.Fields{
+		"id":   link.Key.Int64,
+		"link": link.Link.String,
+	}).Debug("Downloading webm")
+	contentType, data, err := i.Download(link.Link.String)
+	log.WithFields(log.Fields{
+		"id":          link.Key.Int64,
+		"ContentType": contentType,
+		"DataLen":     len(data),
+		"Err":         err,
+	}).Debug("Download complete")
 	if err != nil {
 		i.database.RemoveLink(link)
-		fmt.Println(fmt.Sprintf("Removing dead link %s", link.Link))
+		log.WithField("id", link.Key.Int64).Info("Removing dead link")
 		return
 	}
 	if _, err := i.database.GetRaw(link.Key.Int64, RawWebm); err != nil {
@@ -188,11 +197,15 @@ func (i *imageAction) WebM(link *DBLink) {
 	filePath := filepath.Join(GetConfig().DataPath, "/webm/", strconv.FormatInt(link.Key.Int64, 10))
 	framePath := filepath.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 	ioutil.WriteFile(filePath, data, os.ModePerm)
-	exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+	if runtime.GOOS == "windows" {
+		exec.Command("cmd", "/c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+	} else {
+		exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+	}
 	if notExists(link.Key.Int64, "thumb") {
 		i.database.RemoveLink(link)
 		os.Remove(filePath)
-		fmt.Println(fmt.Sprintf("Invalid WebM %s", link.Link.String))
+		log.WithField("id", link.Key.Int64).Error("WebM convert error")
 	}
 }
 

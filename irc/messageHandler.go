@@ -75,6 +75,9 @@ func (h *Handler) Recv(line string, sender string) {
 				linkType = Image
 			} else if urlSuffix == ".webm" {
 				linkType = WebM
+			} else if urlSuffix == ".gifv" {
+				linkType = WebM
+				url = strings.Replace(url, ".gifv", ".webm", 1)
 			}
 		}
 

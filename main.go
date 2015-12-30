@@ -62,7 +62,7 @@ func main() {
 
 	c.HandleFunc("connected",
 		func(conn *client.Conn, line *client.Line) {
-			log.Debugf("Connected to server %s, joining channel %s", conf.Server, conf.Channel)
+			log.Infof("Connected to server %s, joining channel %s", conf.Server, conf.Channel)
 			conn.Join(fmt.Sprintf("%s %s", conf.Channel, conf.ChannelPassword))
 		})
 
