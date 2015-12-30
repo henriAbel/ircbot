@@ -1,13 +1,21 @@
 package main
 
 import (
-	irc "./irc"
-	web "./web"
 	crypt "crypto/tls"
 	"fmt"
-	client "github.com/fluffle/goirc/client"
 	"os"
+	"path/filepath"
+	"runtime"
+	"time"
+
+	irc "./irc"
+	web "./web"
+	log "github.com/Sirupsen/logrus"
+	client "github.com/fluffle/goirc/client"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
+
+//var log = log2.New()
 
 func main() {
 	if len(os.Args) < 2 {
@@ -15,12 +23,29 @@ func main() {
 		os.Exit(3)
 	}
 	conf := irc.Read(os.Args[1])
+	if len(irc.GetConfig().LogFile) > 0 {
+		f, err := os.OpenFile("test.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+		if err != nil {
+			fmt.Printf("Error opening log file: %v", err)
+			os.Exit(3)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	} else {
+		if runtime.GOOS == "windows" {
+			var format = new(prefixed.TextFormatter)
+			format.ForceColors = true
+			log.SetFormatter(format)
+		}
+	}
 
+	log.SetLevel(log.DebugLevel)
+	log.Infof("<<<<<----- Application started %s ----->>>>>", time.Now())
 	CheckAndCreate(conf.DataPath)
-	CheckAndCreate(conf.DataPath + "/thumb")
-	CheckAndCreate(conf.DataPath + "/image")
-	CheckAndCreate(conf.DataPath + "/gif")
-	CheckAndCreate(conf.DataPath + "/webm")
+	CheckAndCreate(filepath.Join(conf.DataPath, "thumb"))
+	CheckAndCreate(filepath.Join(conf.DataPath, "image"))
+	CheckAndCreate(filepath.Join(conf.DataPath, "gif"))
+	CheckAndCreate(filepath.Join(conf.DataPath, "webm"))
 
 	cfg := client.NewConfig(conf.BotName)
 	cfg.SSL = conf.Ssl
@@ -37,6 +62,7 @@ func main() {
 
 	c.HandleFunc("connected",
 		func(conn *client.Conn, line *client.Line) {
+			log.Debugf("Connected to server %s, joining channel %s", conf.Server, conf.Channel)
 			conn.Join(fmt.Sprintf("%s %s", conf.Channel, conf.ChannelPassword))
 		})
 
@@ -49,7 +75,7 @@ func main() {
 		func(conn *client.Conn, line *client.Line) {
 			quit <- true
 		})
-
+	log.Infof("Connecting to server %s", conf.Server)
 	err := c.Connect()
 	if err != nil {
 		fmt.Printf("Connection error: %s\n", err)
@@ -59,8 +85,11 @@ func main() {
 	<-quit
 }
 
+// CheckAndCreate checks if directory exisrs, if not then creats
 func CheckAndCreate(path string) {
+	log.Debugf("Checking directory: %s", path)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
+		log.Debugf("Directory %s don't exist, creating", path)
 		os.Mkdir(path, os.ModePerm)
 	}
 }

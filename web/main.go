@@ -12,7 +12,17 @@ import (
 )
 
 func StartWeb(config *irc.Config) {
-	jwt_middleware := &jwt.JWTMiddleware{
+	var DefaultDevStack = []rest.Middleware{
+		&rest.TimerMiddleware{},
+		&rest.RecorderMiddleware{},
+		&rest.RecoverMiddleware{
+			EnableResponseStackTrace: true,
+		},
+		&rest.JsonIndentMiddleware{},
+		&rest.ContentTypeCheckerMiddleware{},
+	}
+
+	jwtMiddleware := &jwt.JWTMiddleware{
 		Key:        []byte("VerySecrestKey"),
 		Realm:      "jwt auth",
 		Timeout:    time.Hour,
@@ -22,7 +32,7 @@ func StartWeb(config *irc.Config) {
 		}}
 
 	api := rest.NewApi()
-	api.Use(rest.DefaultDevStack...)
+	api.Use(DefaultDevStack...)
 	api.Use(&rest.IfMiddleware{
 		Condition: func(request *rest.Request) bool {
 			if len(config.WebPassword) > 1 {
@@ -34,19 +44,19 @@ func StartWeb(config *irc.Config) {
 			}
 			return false
 		},
-		IfTrue: jwt_middleware,
+		IfTrue: jwtMiddleware,
 	})
 
 	service := NewLinkService()
 
-	api_router, _ := rest.MakeRouter(
-		rest.Post("/login", jwt_middleware.LoginHandler),
-		rest.Get("/refresh_token", jwt_middleware.RefreshHandler),
+	apiRouter, _ := rest.MakeRouter(
+		rest.Post("/login", jwtMiddleware.LoginHandler),
+		rest.Get("/refresh_token", jwtMiddleware.RefreshHandler),
 		rest.Get("/links", service.GetAll),
 		rest.Get("/links/count", service.GetCount),
 		rest.Get("/raw/:id/:type", service.Raw),
 	)
-	api.SetApp(api_router)
+	api.SetApp(apiRouter)
 
 	http.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
 	http.Handle("/bower_components/", http.FileServer(http.Dir("./web/static/")))

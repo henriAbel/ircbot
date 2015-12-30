@@ -1,14 +1,16 @@
 package web
 
 import (
-	irc "../irc"
-	"github.com/ant0ine/go-json-rest/rest"
 	"io/ioutil"
 	"net/http"
 	"path"
 	"strconv"
 	"strings"
 	"sync"
+
+	irc "../irc"
+
+	"github.com/ant0ine/go-json-rest/rest"
 )
 
 type LinkService struct {
@@ -96,7 +98,6 @@ func (l *LinkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
 
 func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 	resourceType := r.PathParam("type")
-
 	resourceId, err := strconv.ParseInt(r.PathParam("id"), 10, 64)
 	if err != nil {
 		rest.Error(w, "Can't parse resource id", 400)
@@ -119,7 +120,7 @@ func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		link := l.database.GetLinkById(resourceId)
 		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
-		irc.ImageAction.CheckImage(link)
+		irc.ImageAction.AppendCheckLink(link)
 	} else {
 		dbRaw, _ := l.database.GetRaw(resourceId, resourceType)
 		w.Header().Set("Content-Type", dbRaw.Mime_type.String)

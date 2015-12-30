@@ -2,13 +2,14 @@ package irc
 
 import (
 	"fmt"
-	simpleJson "github.com/bitly/go-simplejson"
-	client "github.com/fluffle/goirc/client"
 	"net/http"
 	urlLib "net/url"
 	"regexp"
 	"strings"
 	"time"
+
+	simpleJson "github.com/bitly/go-simplejson"
+	client "github.com/fluffle/goirc/client"
 )
 
 var Images = []string{".jpg", ".png", ".jpeg"}
@@ -48,7 +49,6 @@ func NewHandler(conn *client.Conn, channel string) Handler {
 func (h *Handler) Recv(line string, sender string) {
 	url := h.urlRegex.FindString(line)
 	if len(url) > 0 {
-		cs := make(chan *DBLink)
 		var linkType = Link
 		parsedUrl, _ := urlLib.Parse(url)
 		// Modify dropbox urls
@@ -71,24 +71,17 @@ func (h *Handler) Recv(line string, sender string) {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
 				linkType = Gif
-				go ImageAction.Gif(cs)
 			} else if StartsWith(urlSuffix, Images) {
 				linkType = Image
-				go ImageAction.Image(cs)
 			} else if urlSuffix == ".webm" {
 				linkType = WebM
-				go ImageAction.WebM(cs)
 			}
 		}
 
 		link := h.database.GetLink(url)
 		if (*link == DBLink{}) {
 			l := h.database.AddLink(url, linkType, sender)
-			select {
-			case cs <- l:
-			default:
-			}
-			close(cs)
+			go ImageAction.CheckLink(l)
 		} else {
 			loc, _ := time.LoadLocation("Europe/Tallinn")
 			h.conn.Privmsg(h.channel, fmt.Sprintf("OLD! Selle on varem saatnud juba %s %s!\n", link.Sender_name.String, link.Date.In(loc).Format("2006-01-02 15:04")))
