@@ -5,6 +5,7 @@
 	$scope.itemsInPage = 30;
 	$scope.filter = f;
 	$scope.displayObject = undefined;
+    $scope.dragging = false;
 	var tempObject;
 
 	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
@@ -36,7 +37,7 @@
                     if (i >= $scope.links.length) {
                         $scope.loadNext(function() {
                             var nextModel = $scope.links[0];
-                            $scope.$applyAsync(function() {
+                            $scope.$$postDigest(function() {
                                 $scope.showImage($('.image-list-item:first'),
                                  {url: addToken("/api/raw/" + nextModel.Key + "/image"), model: nextModel})
                             });
@@ -51,7 +52,7 @@
                     if (i < 0) {
                         $scope.loadPrev(function() {
                             var nextModel = $scope.links[$scope.links.length -1];
-                            $scope.$applyAsync(function() {
+                            $scope.$$postDigest(function() {
                                 $scope.showImage($('.image-list-item:last'),
                                  {url: addToken("/api/raw/" + nextModel.Key + "/image"), model: nextModel})
                             });
@@ -102,9 +103,12 @@
 		last.after(tempObject);
 		$scope.displayObject = o;
         $scope.displayObject.domElement = clickedParent;
+        wheelzoom(document.querySelectorAll('.display-box img'));
 	};
 
 	$scope.hideImage = function() {
+        if ($scope.dragging) return;
+        document.querySelector('.display-box img').dispatchEvent(new CustomEvent('wheelzoom.destroy'));
 		$scope.displayObject = undefined;
 		tempObject.remove();
 		tempObject = undefined;
