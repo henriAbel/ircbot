@@ -39,6 +39,10 @@ angular
 					filter: function(){return 'webm,gif';}
 				}
 			})
+			.when('/stats/', {
+				templateUrl: 'views/stats.html',
+				controller: 'StatController'
+			})
 			.when('/login/', {
 				templateUrl: 'login.html',
 				controller: 'LoginController'
@@ -65,4 +69,8 @@ var formatUrl = function(url) {
 var addToken = function(url) {
 	if (window.sessionStorage.token === undefined) return url;
 	return url + '?authorization=' + window.sessionStorage.token;
+}
+
+String.prototype.capitalizeFirstLetter = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
 }

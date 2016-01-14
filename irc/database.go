@@ -3,10 +3,11 @@ package irc
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
 	"strings"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type DBLink struct {
@@ -27,6 +28,17 @@ type DBRaw struct {
 	Mime_type sql.NullString
 	Link_id   sql.NullInt64
 	Data_type sql.NullString
+}
+
+type DBStatGroupLink struct {
+	Count int64
+	Type  string
+}
+
+type DBStatGroupUser struct {
+	Count     int64
+	User_name string
+	Sender_id int64
 }
 
 // Those strings are used in database type fields
@@ -257,6 +269,40 @@ func (i *IrcDatabase) RemoveLink(link *DBLink) {
 	checkErr(err)
 	transaction.Stmt(stmt).Exec(link.Key.Int64)
 	transaction.Commit()
+}
+
+func (i *IrcDatabase) GetLinkGroupStat() *[]DBStatGroupLink {
+	db := i.Open()
+	defer db.Close()
+	transaction, _ := db.Begin()
+	rows, err := db.Query("select count(*), link_type from irc_link group by link_type")
+	checkErr(err)
+	var stats []DBStatGroupLink
+	for rows.Next() {
+		group := DBStatGroupLink{}
+		rows.Scan(&group.Count, &group.Type)
+		stats = append(stats, group)
+	}
+
+	transaction.Commit()
+	return &stats
+}
+
+func (i *IrcDatabase) GetUserStat() *[]DBStatGroupUser {
+	db := i.Open()
+	defer db.Close()
+	transaction, _ := db.Begin()
+	rows, err := db.Query("SELECT count(*), (select user_name from irc_user where id = irc_link.sender_id), sender_id from irc_link group by sender_id")
+	checkErr(err)
+	var stats []DBStatGroupUser
+	for rows.Next() {
+		group := DBStatGroupUser{}
+		rows.Scan(&group.Count, &group.User_name, &group.Sender_id)
+		stats = append(stats, group)
+	}
+
+	transaction.Commit()
+	return &stats
 }
 
 func checkErr(err error) {

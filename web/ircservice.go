@@ -13,12 +13,12 @@ import (
 	"github.com/ant0ine/go-json-rest/rest"
 )
 
-type LinkService struct {
+type linkService struct {
 	sync.RWMutex
 	database irc.IrcDatabase
 }
 
-type Link struct {
+type link struct {
 	Key         int64
 	Link        string
 	Sender_id   int64
@@ -27,24 +27,40 @@ type Link struct {
 	Sender_name string
 }
 
-type Count struct {
+type statGroupLink struct {
+	Count int64
+	Type  string
+}
+
+type statGroupUser struct {
+	Count     int64
+	User_name string
+	Sender_id int64
+}
+
+type stats struct {
+	GroupLink *[]irc.DBStatGroupLink
+	GroupUser *[]irc.DBStatGroupUser
+}
+
+type count struct {
 	Count int
 }
 
-func NewLinkService() LinkService {
-	return LinkService{
+func NewLinkService() linkService {
+	return linkService{
 		database: irc.IrcDatabase{},
 	}
 }
 
-func transform(dblinks *[]irc.DBLink) *[]Link {
+func transform(dblinks *[]irc.DBLink) *[]link {
 	if len(*dblinks) == 0 {
-		return &[]Link{}
+		return &[]link{}
 	}
-	var links = make([]Link, len(*dblinks))
+	var links = make([]link, len(*dblinks))
 	for i := 0; i < len(*dblinks); i++ {
 		dbLink := (*dblinks)[i]
-		links[i] = Link{
+		links[i] = link{
 			Key:         dbLink.Key.Int64,
 			Link:        dbLink.Link.String,
 			Sender_id:   dbLink.Sender_id.Int64,
@@ -56,7 +72,7 @@ func transform(dblinks *[]irc.DBLink) *[]Link {
 	return &links
 }
 
-func (l *LinkService) GetAll(w rest.ResponseWriter, r *rest.Request) {
+func (l *linkService) GetAll(w rest.ResponseWriter, r *rest.Request) {
 	limitParam := r.URL.Query().Get("limit")
 	offsetParam := r.URL.Query().Get("offset")
 
@@ -82,7 +98,7 @@ func (l *LinkService) GetAll(w rest.ResponseWriter, r *rest.Request) {
 	w.WriteJson(dblinks)
 }
 
-func (l *LinkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
+func (l *linkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
 	filterParam := r.URL.Query().Get("filter")
 	filter := []string{}
 	if len(filterParam) > 0 {
@@ -90,13 +106,19 @@ func (l *LinkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	l.Lock()
-	count := l.database.GetCount(filter)
+	dbCount := l.database.GetCount(filter)
 	l.Unlock()
 
-	w.WriteJson(Count{count})
+	w.WriteJson(count{dbCount})
 }
 
-func (l *LinkService) Raw(w rest.ResponseWriter, r *rest.Request) {
+func (l *linkService) GetAllStats(w rest.ResponseWriter, r *rest.Request) {
+	groupStats := l.database.GetLinkGroupStat()
+	userStats := l.database.GetUserStat()
+	w.WriteJson(stats{groupStats, userStats})
+}
+
+func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 	resourceType := r.PathParam("type")
 	resourceId, err := strconv.ParseInt(r.PathParam("id"), 10, 64)
 	if err != nil {

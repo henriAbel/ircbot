@@ -55,6 +55,7 @@ func StartWeb(config *irc.Config) {
 		rest.Get("/links", service.GetAll),
 		rest.Get("/links/count", service.GetCount),
 		rest.Get("/raw/:id/:type", service.Raw),
+		rest.Get("/stat/all", service.GetAllStats),
 	)
 	api.SetApp(apiRouter)
 
