@@ -41,6 +41,12 @@ type DBStatGroupUser struct {
 	Sender_id int64
 }
 
+type DBStatDuplicate struct {
+	Count     int64
+	User_name string
+	Sender_id int64
+}
+
 // Those strings are used in database type fields
 const (
 	Duplicate         = "Duplicate"
@@ -274,7 +280,6 @@ func (i *IrcDatabase) RemoveLink(link *DBLink) {
 func (i *IrcDatabase) GetLinkGroupStat() *[]DBStatGroupLink {
 	db := i.Open()
 	defer db.Close()
-	transaction, _ := db.Begin()
 	rows, err := db.Query("select count(*), link_type from irc_link group by link_type")
 	checkErr(err)
 	var stats []DBStatGroupLink
@@ -284,14 +289,12 @@ func (i *IrcDatabase) GetLinkGroupStat() *[]DBStatGroupLink {
 		stats = append(stats, group)
 	}
 
-	transaction.Commit()
 	return &stats
 }
 
 func (i *IrcDatabase) GetUserStat() *[]DBStatGroupUser {
 	db := i.Open()
 	defer db.Close()
-	transaction, _ := db.Begin()
 	rows, err := db.Query("SELECT count(*), (select user_name from irc_user where id = irc_link.sender_id), sender_id from irc_link group by sender_id")
 	checkErr(err)
 	var stats []DBStatGroupUser
@@ -300,8 +303,20 @@ func (i *IrcDatabase) GetUserStat() *[]DBStatGroupUser {
 		rows.Scan(&group.Count, &group.User_name, &group.Sender_id)
 		stats = append(stats, group)
 	}
+	return &stats
+}
 
-	transaction.Commit()
+func (i *IrcDatabase) GetDuplicateStat() *[]DBStatDuplicate {
+	db := i.Open()
+	defer db.Close()
+	rows, err := db.Query("SELECT count(*), (select user_name from irc_user where id = irc_log.sender_id), sender_id from irc_log group by sender_id")
+	checkErr(err)
+	var stats []DBStatDuplicate
+	for rows.Next() {
+		stat := DBStatDuplicate{}
+		rows.Scan(&stat.Count, &stat.User_name, &stat.Sender_id)
+		stats = append(stats, stat)
+	}
 	return &stats
 }
 

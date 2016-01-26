@@ -39,8 +39,9 @@ type statGroupUser struct {
 }
 
 type stats struct {
-	GroupLink *[]irc.DBStatGroupLink
-	GroupUser *[]irc.DBStatGroupUser
+	GroupLink  *[]irc.DBStatGroupLink
+	GroupUser  *[]irc.DBStatGroupUser
+	Duplicates *[]irc.DBStatDuplicate
 }
 
 type count struct {
@@ -115,7 +116,8 @@ func (l *linkService) GetCount(w rest.ResponseWriter, r *rest.Request) {
 func (l *linkService) GetAllStats(w rest.ResponseWriter, r *rest.Request) {
 	groupStats := l.database.GetLinkGroupStat()
 	userStats := l.database.GetUserStat()
-	w.WriteJson(stats{groupStats, userStats})
+	duplicates := l.database.GetDuplicateStat()
+	w.WriteJson(stats{groupStats, userStats, duplicates})
 }
 
 func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
