@@ -1,12 +1,13 @@
 package web
 
 import (
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	irc "../irc"
 
@@ -127,27 +128,30 @@ func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		rest.Error(w, "Can't parse resource id", 400)
 		return
 	}
-	data := []byte{}
+
+	var file *os.File
 
 	switch resourceType {
 	case irc.RawImage:
-		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "image", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "image", r.PathParam("id")))
 	case irc.RawImageThumbnail:
-		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
 	case irc.RawWebm:
-		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "webm", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "webm", r.PathParam("id")))
 	case irc.RawWebmFrame:
-		data, err = ioutil.ReadFile(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
 	}
 
-	if len(data) == 0 {
+	if err != nil {
 		link := l.database.GetLinkById(resourceId)
 		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")
 		irc.ImageAction.AppendCheckLink(link)
 	} else {
 		dbRaw, _ := l.database.GetRaw(resourceId, resourceType)
+		fi, _ := file.Stat()
 		w.Header().Set("Content-Type", dbRaw.Mime_type.String)
-		w.(http.ResponseWriter).Write(data)
+		w.Header().Set("Content-Length", strconv.FormatInt(fi.Size(), 10))
+		http.ServeContent(w.(http.ResponseWriter), r.Request, "", time.Now(), file)
 	}
 }
