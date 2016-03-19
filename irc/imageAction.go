@@ -124,16 +124,16 @@ func (i *imageAction) Image(link *DBLink) {
 		thumbFilePath := filepath.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
 		ioutil.WriteFile(filePath, data, os.ModePerm)
 		if runtime.GOOS == "windows" {
-			exec.Command("cmd", "/c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s & rename %s *. ",
+			exec.Command("cmd", "/c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s & rename %s *. ",
 				thumbPath, imgType, filePath, thumbFilePath)).Output()
 		} else {
-			exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
+			exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
 				thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
 		}
 		if notExists(link.Key.Int64, "thumb") {
 			i.database.RemoveLink(link)
 			os.Remove(filePath)
-			log.WithField("id", link.Key.Int64).Errorf("Can't make thumbnail %s, ffmpeg error", link.Link.String)
+			log.WithField("id", link.Key.Int64).Errorf("Can't make thumbnail %s, vips error", link.Link.String)
 		} else {
 			log.WithField("id", link.Key.Int64).Debug("Image download/convert successful")
 		}

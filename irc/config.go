@@ -22,7 +22,7 @@ type Config struct {
 	DataPath string
 	Port,
 	WebPort int
-	Ssl, AcceptInvalidCert bool
+	Ssl, AcceptInvalidCert, AutoReJoin, AutoReconnect bool
 }
 
 var (
@@ -56,13 +56,13 @@ func Read(configFile string) *Config {
 					} else if field.Kind() == reflect.Int {
 						intValue, err := strconv.ParseInt(value, 10, 64)
 						if err != nil {
-							fmt.Sprintln("Cannot parse '%s' integer value '%s'", ps.Type().Field(i).Name, value)
+							fmt.Printf("Cannot parse '%s' integer value '%s'", ps.Type().Field(i).Name, value)
 						}
 						field.SetInt(intValue)
 					} else if field.Kind() == reflect.Bool {
 						boolValue, err := strconv.ParseBool(value)
 						if err != nil {
-							fmt.Sprintln("Cannot parse '%s' boolean value '%s'", ps.Type().Field(i).Name, value)
+							fmt.Printf("Cannot parse '%s' boolean value '%s'", ps.Type().Field(i).Name, value)
 						}
 						field.SetBool(boolValue)
 					} else {

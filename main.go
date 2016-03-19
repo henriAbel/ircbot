@@ -15,16 +15,21 @@ import (
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-//var log = log2.New()
+var (
+	c             *client.Conn
+	conf          *irc.Config
+	quit          chan bool
+	lastReconnect time.Time
+)
 
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Cannot read config file!")
 		os.Exit(3)
 	}
-	conf := irc.Read(os.Args[1])
+	conf = irc.Read(os.Args[1])
 	if len(irc.GetConfig().LogFile) > 0 {
-		f, err := os.OpenFile("test.log", os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+		f, err := os.OpenFile(irc.GetConfig().LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			fmt.Printf("Error opening log file: %v", err)
 			os.Exit(3)
@@ -52,13 +57,15 @@ func main() {
 	cfg.Server = fmt.Sprintf("%s:%d", conf.Server, conf.Port)
 	cfg.Pass = conf.ServerPassword
 
-	c := client.Client(cfg)
+	c = client.Client(cfg)
 	handler := irc.NewHandler(c, conf.Channel)
 
 	var ssl crypt.Config
 	ssl.InsecureSkipVerify = conf.AcceptInvalidCert
 	cfg.SSLConfig = &ssl
-	quit := make(chan bool)
+
+	quit = make(chan bool)
+	lastReconnect = time.Now()
 
 	c.HandleFunc("connected",
 		func(conn *client.Conn, line *client.Line) {
@@ -73,12 +80,21 @@ func main() {
 
 	c.HandleFunc("disconnected",
 		func(conn *client.Conn, line *client.Line) {
-			quit <- true
+			log.Infof("Disconnected from server %s", conf.Server)
+			handleDisconnect()
 		})
-	log.Infof("Connecting to server %s", conf.Server)
-	err := c.Connect()
+	c.HandleFunc("KICK",
+		func(conn *client.Conn, line *client.Line) {
+			log.Infof("Kicked from channel %s", conf.Channel)
+			if conf.AutoReJoin {
+				log.Infof("Joining channel %s", conf.Channel)
+				conn.Join(fmt.Sprintf("%s %s", conf.Channel, conf.ChannelPassword))
+			}
+		})
+	err := connect(conf)
 	if err != nil {
-		fmt.Printf("Connection error: %s\n", err)
+		log.Errorf(err.Error())
+		handleDisconnect()
 	}
 	go irc.ImageAction.StartupCheck()
 	web.StartWeb(conf)
@@ -92,4 +108,27 @@ func CheckAndCreate(path string) {
 		log.Debugf("Directory %s don't exist, creating", path)
 		os.Mkdir(path, os.ModePerm)
 	}
+}
+
+func handleDisconnect() {
+	if conf.AutoReconnect {
+		go func() {
+			if time.Since(lastReconnect).Seconds() < 10 {
+				time.Sleep(time.Duration(10-time.Since(lastReconnect).Seconds()) * time.Second)
+			}
+			err := connect(conf)
+			if nil != err {
+				log.Errorf(err.Error())
+				handleDisconnect()
+			}
+		}()
+	} else {
+		quit <- true
+	}
+}
+
+func connect(conf *irc.Config) error {
+	log.Infof("Connecting to server %s", conf.Server)
+	lastReconnect = time.Now()
+	return c.Connect()
 }
