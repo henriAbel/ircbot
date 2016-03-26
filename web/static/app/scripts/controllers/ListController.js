@@ -2,25 +2,38 @@
 
  angular.module('ircbotApp').controller('ListController', ['$scope', 'LinkProvider', 'filter', '$compile', '$templateCache', function ($scope, LinkProvider, f, $compile, $templateCache) {
 	$scope.offset = 0;
-	$scope.itemsInPage = 30;
+  /*
+    If value is < 0, then itemsInPage function will recalculate value
+    Window resize event will change value to -1
+  */
+  var itemsInPageLast = -1;
+	$scope.itemsInPage = function() {
+    if (itemsInPageLast > 0) return itemsInPageLast;
+    var w = $('.content').width();
+    var h = $(window).height();
+    var columns = Math.floor(w / 125);
+    var rows = Math.floor(h / 125);
+    itemsInPageLast = columns * rows;
+    return itemsInPageLast;
+  };
 	$scope.filter = f;
 	$scope.displayObject = undefined;
     $scope.dragging = false;
 	var tempObject;
 
 	LinkProvider.getCount({filter: f}).$promise.then(function(o) {
-		$scope.listCount = o.Count == 0 ? 1 : Math.ceil(o.Count / $scope.itemsInPage);
+		$scope.listCount = o.Count == 0 ? 1 : Math.ceil(o.Count / $scope.itemsInPage());
 	});
 
 	$scope.loadNext = function(callback) {
-        if ($scope.links.length <  $scope.itemsInPage) return;
-		$scope.offset += $scope.itemsInPage;
+        if ($scope.links.length <  $scope.itemsInPage()) return;
+		$scope.offset += $scope.itemsInPage();
 		loadLinks(callback);
 	};
 
 	$scope.loadPrev = function(callback) {
         if ($scope.offset == 0) return;
-		$scope.offset -= $scope.itemsInPage;
+		$scope.offset -= $scope.itemsInPage();
 		if ($scope.offset < 0) {
 			$scope.offset = 0;
 		}
@@ -80,13 +93,13 @@
 	});
 
 	var loadLinks = function(callback) {
-		LinkProvider.get({filter: f, offset: $scope.offset, limit: $scope.itemsInPage}).$promise.then(function(e) {
+		LinkProvider.get({filter: f, offset: $scope.offset, limit: $scope.itemsInPage()}).$promise.then(function(e) {
             $scope.links = e;
             if (callback !== undefined) {
                 callback.call(this);
             }
         });
-		$scope.page = Math.ceil($scope.offset / $scope.itemsInPage) + 1;
+		$scope.page = Math.ceil($scope.offset / $scope.itemsInPage()) + 1;
 	};
 
 	$scope.showImage = function(e, o) {
@@ -113,6 +126,18 @@
 		tempObject.remove();
 		tempObject = undefined;
 	};
+  var t = undefined;
+  $(window).resize(function() {
+    $scope.$apply(function(){
+      if (t !== undefined) {
+          clearTimeout(t);
+      }
+      t = setTimeout(function() {
+        itemsInPageLast = -1;
+        loadLinks();
+      }, 250)
+    });
+  });
 
 	var getLastElementInRow = function(clickedParent) {
 		var allImages = clickedParent.nextAll('.image-list-item');
