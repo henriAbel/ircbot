@@ -281,7 +281,7 @@ func (i *IrcDatabase) GetLinkGroupStat() *[]DBStatGroupLink {
 	defer db.Close()
 	rows, err := db.Query("select count(*), link_type from irc_link group by link_type")
 	checkErr(err)
-	var stats []DBStatGroupLink
+	stats := make([]DBStatGroupLink, 0)
 	for rows.Next() {
 		group := DBStatGroupLink{}
 		rows.Scan(&group.Count, &group.Type)
@@ -296,7 +296,7 @@ func (i *IrcDatabase) GetUserStat() *[]DBStatGroupUser {
 	defer db.Close()
 	rows, err := db.Query("SELECT count(*), (select user_name from irc_user where id = irc_link.sender_id), sender_id from irc_link group by sender_id")
 	checkErr(err)
-	var stats []DBStatGroupUser
+	stats := make([]DBStatGroupUser, 0)
 	for rows.Next() {
 		group := DBStatGroupUser{}
 		rows.Scan(&group.Count, &group.User_name, &group.Sender_id)
@@ -310,7 +310,7 @@ func (i *IrcDatabase) GetDuplicateStat() *[]DBStatDuplicate {
 	defer db.Close()
 	rows, err := db.Query("SELECT count(*), (select user_name from irc_user where id = irc_log.sender_id), sender_id from irc_log group by sender_id")
 	checkErr(err)
-	var stats []DBStatDuplicate
+	stats := make([]DBStatDuplicate, 0)
 	for rows.Next() {
 		stat := DBStatDuplicate{}
 		rows.Scan(&stat.Count, &stat.User_name, &stat.Sender_id)
