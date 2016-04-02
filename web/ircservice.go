@@ -133,13 +133,13 @@ func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 
 	switch resourceType {
 	case irc.RawImage:
-		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "image", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetDataPath(), "image", r.PathParam("id")))
 	case irc.RawImageThumbnail:
-		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetDataPath(), "thumb", r.PathParam("id")))
 	case irc.RawWebm:
-		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "webm", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetDataPath(), "webm", r.PathParam("id")))
 	case irc.RawWebmFrame:
-		file, err = os.Open(path.Join(irc.GetConfig().DataPath, "thumb", r.PathParam("id")))
+		file, err = os.Open(path.Join(irc.GetDataPath(), "thumb", r.PathParam("id")))
 	}
 
 	if err != nil {

@@ -1,80 +1,90 @@
 package irc
 
 import (
-	"bufio"
+	"bytes"
 	"fmt"
-	"os"
-	"reflect"
-	"strconv"
-	"strings"
+	"io/ioutil"
+
+	"github.com/spf13/viper"
 )
 
-type Config struct {
-	Server,
-	ServerPassword,
-	Channel,
-	ChannelPassword,
-	BotName,
-	LogFile,
-	DBFile,
-	YoutubeApiKey,
-	WebPassword,
-	DataPath string
-	Port,
-	WebPort int
-	Ssl, AcceptInvalidCert, AutoReJoin, AutoReconnect bool
-}
-
-var (
-	cfg      Config
-	location string
-)
-
-func GetConfig() *Config {
-	return Read(location)
-}
-
-func Read(configFile string) *Config {
-	if cfg == (Config{}) {
-		cfg = Config{}
-		location = configFile
-		ps := reflect.Indirect(reflect.ValueOf(&cfg))
-		reader, _ := os.Open(configFile)
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if strings.HasPrefix(line, ";") || strings.HasPrefix(line, "#") {
-				continue
-			}
-			split := strings.Split(line, ":")
-			for i := 0; i < ps.NumField(); i++ {
-				if strings.ToLower(ps.Type().Field(i).Name) == strings.ToLower(strings.TrimSpace(split[0])) {
-					field := ps.FieldByName(ps.Type().Field(i).Name)
-					value := strings.TrimSpace(strings.Join(split[1:], ":"))
-					if field.Kind() == reflect.String {
-						field.SetString(value)
-					} else if field.Kind() == reflect.Int {
-						intValue, err := strconv.ParseInt(value, 10, 64)
-						if err != nil {
-							fmt.Printf("Cannot parse '%s' integer value '%s'", ps.Type().Field(i).Name, value)
-						}
-						field.SetInt(intValue)
-					} else if field.Kind() == reflect.Bool {
-						boolValue, err := strconv.ParseBool(value)
-						if err != nil {
-							fmt.Printf("Cannot parse '%s' boolean value '%s'", ps.Type().Field(i).Name, value)
-						}
-						field.SetBool(boolValue)
-					} else {
-						fmt.Println("Unknown field type")
-					}
-					break
-				}
-			}
-		}
-		if err := scanner.Err(); err != nil {
-			fmt.Println("Cannot open file: ", err)
-		}
+func Init(configFile string) {
+	cfgData, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		fmt.Println(err)
 	}
-	return &cfg
+	viper.SetConfigType("yaml")
+	viper.ReadConfig(bytes.NewBuffer(cfgData))
+}
+
+func GetServerAddress() string {
+	return viper.GetString("irc.server.address")
+}
+
+func GetServerPort() int {
+	return viper.GetInt("irc.server.port")
+}
+
+func GetServerPassword() string {
+	return viper.GetString("irc.server.serverPassword")
+}
+
+func GetChannel() string {
+	return viper.GetString("irc.server.channel")
+}
+
+func GetChannelPassword() string {
+	return viper.GetString("irc.server.channelPassword")
+}
+
+func GetBotName() string {
+	return viper.GetString("irc.server.name")
+}
+
+func GetUseSsl() bool {
+	return viper.GetBool("irc.server.ssl")
+}
+
+func GetAcceptInvalidCert() bool {
+	return viper.GetBool("irc.server.acceptInvalidCert")
+}
+
+func GetAutoReJoin() bool {
+	return viper.GetBool("irc.server.autoReJoin")
+}
+
+func GetAutoReconnect() bool {
+	return viper.GetBool("irc.server.autoReoconnect")
+}
+
+func GetDbFile() string {
+	return viper.GetString("irc.system.dbFile")
+}
+
+func GetDataPath() string {
+	return viper.GetString("irc.system.dataPath")
+}
+
+func GetYoutubeApiKey() string {
+	return viper.GetString("irc.system.youtubeApiKey")
+}
+
+func GetWebPort() int {
+	return viper.GetInt("web.port")
+}
+
+func GetWebPassword() string {
+	return viper.GetString("web.password")
+}
+
+func GetLogFile() string {
+	return viper.GetString("irc.system.logFile")
+}
+
+func GetCertFile() string {
+	return viper.GetString("web.tls.certificate")
+}
+
+func GetKeyFile() string {
+	return viper.GetString("web.tls.keyfile")
 }

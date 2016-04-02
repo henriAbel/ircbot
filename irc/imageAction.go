@@ -119,8 +119,8 @@ func (i *imageAction) Image(link *DBLink) {
 			imgType = "png"
 		}
 
-		filePath := filepath.Join(GetConfig().DataPath, "image", strconv.FormatInt(link.Key.Int64, 10))
-		thumbPath := filepath.Join(GetConfig().DataPath, "thumb") + "/"
+		filePath := filepath.Join(GetDataPath(), "image", strconv.FormatInt(link.Key.Int64, 10))
+		thumbPath := filepath.Join(GetDataPath(), "thumb") + "/"
 		thumbFilePath := filepath.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
 		ioutil.WriteFile(filePath, data, os.ModePerm)
 		if runtime.GOOS == "windows" {
@@ -157,9 +157,9 @@ func (i *imageAction) Gif(link *DBLink) {
 		i.database.AddRaw(RawWebmFrame, link, "image/jpeg")
 	}
 
-	filePath := filepath.Join(GetConfig().DataPath, "/gif/", strconv.FormatInt(link.Key.Int64, 10)) + ".gif"
-	outPath := filepath.Join(GetConfig().DataPath, "/webm/", strconv.FormatInt(link.Key.Int64, 10))
-	framePath := filepath.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
+	filePath := filepath.Join(GetDataPath(), "/gif/", strconv.FormatInt(link.Key.Int64, 10)) + ".gif"
+	outPath := filepath.Join(GetDataPath(), "/webm/", strconv.FormatInt(link.Key.Int64, 10))
+	framePath := filepath.Join(GetDataPath(), "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 	ioutil.WriteFile(filePath, data, os.ModePerm)
 	gifToWebM(filePath, outPath, framePath)
 	if notExists(link.Key.Int64, "thumb") {
@@ -194,8 +194,8 @@ func (i *imageAction) WebM(link *DBLink) {
 		i.database.AddRaw(RawWebmFrame, link, "image/jpeg")
 	}
 
-	filePath := filepath.Join(GetConfig().DataPath, "/webm/", strconv.FormatInt(link.Key.Int64, 10))
-	framePath := filepath.Join(GetConfig().DataPath, "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
+	filePath := filepath.Join(GetDataPath(), "/webm/", strconv.FormatInt(link.Key.Int64, 10))
+	framePath := filepath.Join(GetDataPath(), "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 	ioutil.WriteFile(filePath, data, os.ModePerm)
 	if runtime.GOOS == "windows" {
 		exec.Command("cmd", "/c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
@@ -230,12 +230,12 @@ func (i *imageAction) Download(url string) (string, []byte, error) {
 // Checks if there are unconverted gifs, missing thumbnails etc
 func (i *imageAction) StartupCheck() {
 	// Check unconverted gifs
-	arr, _ := ioutil.ReadDir(filepath.Join(GetConfig().DataPath, "gif"))
+	arr, _ := ioutil.ReadDir(filepath.Join(GetDataPath(), "gif"))
 	for _, t := range arr {
 		baseName := strings.TrimSuffix(t.Name(), filepath.Ext(t.Name()))
-		filePath := filepath.Join(GetConfig().DataPath, "/gif/", t.Name())
-		outPath := filepath.Join(GetConfig().DataPath, "/webm/", baseName)
-		framePath := filepath.Join(GetConfig().DataPath, "/thumb/", baseName)
+		filePath := filepath.Join(GetDataPath(), "/gif/", t.Name())
+		outPath := filepath.Join(GetDataPath(), "/webm/", baseName)
+		framePath := filepath.Join(GetDataPath(), "/thumb/", baseName)
 		gifToWebM(filePath, outPath, framePath)
 	}
 	// TODO check missing thumbnails
@@ -247,7 +247,7 @@ func gifToWebM(filePath, outPath, framePath string) {
 }
 
 func notExists(id int64, fileType string) bool {
-	if _, err := os.Stat(filepath.Join(GetConfig().DataPath, fileType, strconv.FormatInt(id, 10))); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(GetDataPath(), fileType, strconv.FormatInt(id, 10))); os.IsNotExist(err) {
 		return true
 	}
 	return false

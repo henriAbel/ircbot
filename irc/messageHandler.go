@@ -100,7 +100,7 @@ func (h *Handler) Recv(line string, sender string) {
 }
 
 func (h *Handler) Youtube(videoId string, sender string) {
-	var apiUrl = fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=%s&key=%s", videoId, GetConfig().YoutubeApiKey)
+	var apiUrl = fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=%s&key=%s", videoId, GetYoutubeApiKey())
 	res, err := http.Get(apiUrl)
 	if err != nil {
 		fmt.Println(err)

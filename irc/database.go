@@ -63,12 +63,11 @@ type IrcDatabase struct {
 }
 
 func (i *IrcDatabase) Open() *sql.DB {
-	config := GetConfig()
-	if config.DBFile == "" {
+	if len(GetDbFile()) == 0 {
 		fmt.Println("Database path not set!")
 		os.Exit(3)
 	}
-	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?parseTime=true", config.DBFile))
+	db, err := sql.Open("sqlite3", fmt.Sprintf("%s?parseTime=true", GetDbFile()))
 	if err != nil {
 		fmt.Println("Cannot open database")
 		os.Exit(3)

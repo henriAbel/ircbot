@@ -17,7 +17,6 @@ import (
 
 var (
 	c             *client.Conn
-	conf          *irc.Config
 	quit          chan bool
 	lastReconnect time.Time
 )
@@ -27,9 +26,9 @@ func main() {
 		fmt.Println("Cannot read config file!")
 		os.Exit(3)
 	}
-	conf = irc.Read(os.Args[1])
-	if len(irc.GetConfig().LogFile) > 0 {
-		f, err := os.OpenFile(irc.GetConfig().LogFile, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
+	irc.Init(os.Args[1])
+	if len(irc.GetLogFile()) > 0 {
+		f, err := os.OpenFile(irc.GetLogFile(), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
 			fmt.Printf("Error opening log file: %v", err)
 			os.Exit(3)
@@ -46,22 +45,22 @@ func main() {
 
 	log.SetLevel(log.DebugLevel)
 	log.Infof("<<<<<----- Application started %s ----->>>>>", time.Now())
-	CheckAndCreate(conf.DataPath)
-	CheckAndCreate(filepath.Join(conf.DataPath, "thumb"))
-	CheckAndCreate(filepath.Join(conf.DataPath, "image"))
-	CheckAndCreate(filepath.Join(conf.DataPath, "gif"))
-	CheckAndCreate(filepath.Join(conf.DataPath, "webm"))
+	CheckAndCreate(irc.GetDataPath())
+	CheckAndCreate(filepath.Join(irc.GetDataPath(), "thumb"))
+	CheckAndCreate(filepath.Join(irc.GetDataPath(), "image"))
+	CheckAndCreate(filepath.Join(irc.GetDataPath(), "gif"))
+	CheckAndCreate(filepath.Join(irc.GetDataPath(), "webm"))
 
-	cfg := client.NewConfig(conf.BotName)
-	cfg.SSL = conf.Ssl
-	cfg.Server = fmt.Sprintf("%s:%d", conf.Server, conf.Port)
-	cfg.Pass = conf.ServerPassword
+	cfg := client.NewConfig(irc.GetBotName())
+	cfg.SSL = irc.GetUseSsl()
+	cfg.Server = fmt.Sprintf("%s:%d", irc.GetServerAddress(), irc.GetServerPort())
+	cfg.Pass = irc.GetServerPassword()
 
 	c = client.Client(cfg)
-	handler := irc.NewHandler(c, conf.Channel)
+	handler := irc.NewHandler(c, irc.GetChannel())
 
 	var ssl crypt.Config
-	ssl.InsecureSkipVerify = conf.AcceptInvalidCert
+	ssl.InsecureSkipVerify = irc.GetAcceptInvalidCert()
 	cfg.SSLConfig = &ssl
 
 	quit = make(chan bool)
@@ -69,8 +68,8 @@ func main() {
 
 	c.HandleFunc("connected",
 		func(conn *client.Conn, line *client.Line) {
-			log.Infof("Connected to server %s, joining channel %s", conf.Server, conf.Channel)
-			conn.Join(fmt.Sprintf("%s %s", conf.Channel, conf.ChannelPassword))
+			log.Infof("Connected to server %s, joining channel %s", irc.GetServerAddress(), irc.GetChannel())
+			conn.Join(fmt.Sprintf("%s %s", irc.GetChannel(), irc.GetChannelPassword()))
 		})
 
 	c.HandleFunc("privmsg",
@@ -80,24 +79,24 @@ func main() {
 
 	c.HandleFunc("disconnected",
 		func(conn *client.Conn, line *client.Line) {
-			log.Infof("Disconnected from server %s", conf.Server)
+			log.Infof("Disconnected from server %s", irc.GetServerAddress())
 			handleDisconnect()
 		})
 	c.HandleFunc("KICK",
 		func(conn *client.Conn, line *client.Line) {
-			log.Infof("Kicked from channel %s", conf.Channel)
-			if conf.AutoReJoin {
-				log.Infof("Joining channel %s", conf.Channel)
-				conn.Join(fmt.Sprintf("%s %s", conf.Channel, conf.ChannelPassword))
+			log.Infof("Kicked from channel %s", irc.GetChannel())
+			if irc.GetAutoReJoin() {
+				log.Infof("Joining channel %s", irc.GetChannel())
+				conn.Join(fmt.Sprintf("%s %s", irc.GetChannel(), irc.GetChannelPassword()))
 			}
 		})
-	err := connect(conf)
+	err := connect()
 	if err != nil {
 		log.Errorf(err.Error())
 		handleDisconnect()
 	}
 	go irc.ImageAction.StartupCheck()
-	web.StartWeb(conf)
+	web.StartWeb()
 	<-quit
 }
 
@@ -111,12 +110,12 @@ func CheckAndCreate(path string) {
 }
 
 func handleDisconnect() {
-	if conf.AutoReconnect {
+	if irc.GetAutoReconnect() {
 		go func() {
 			if time.Since(lastReconnect).Seconds() < 10 {
 				time.Sleep(time.Duration(10-time.Since(lastReconnect).Seconds()) * time.Second)
 			}
-			err := connect(conf)
+			err := connect()
 			if nil != err {
 				log.Errorf(err.Error())
 				handleDisconnect()
@@ -127,8 +126,8 @@ func handleDisconnect() {
 	}
 }
 
-func connect(conf *irc.Config) error {
-	log.Infof("Connecting to server %s", conf.Server)
+func connect() error {
+	log.Infof("Connecting to server %s", irc.GetServerAddress())
 	lastReconnect = time.Now()
 	return c.Connect()
 }
