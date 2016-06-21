@@ -59,14 +59,11 @@ func (h *Handler) Recv(line string, sender string) {
 			values.Add("raw", "1")
 			url = strings.Replace(url, url[strings.LastIndex(url, "?")+1:], values.Encode(), -1)
 		}
-		if strings.Index(url, "youtube.com/watch") > 0 {
-			query, _ := urlLib.ParseQuery(parsedUrl.RawQuery)
-			h.Youtube(query["v"][0], sender)
-			linkType = Youtube
 
-		} else if strings.Index(url, "://youtu.be/") > 0 {
-			h.Youtube(parsedUrl.Path[1:], sender)
+		isYoutube, videoId := h.ParseYoutube(parsedUrl)
+		if isYoutube {
 			linkType = Youtube
+			go h.Youtube(videoId)
 		} else {
 			urlSuffix := url[strings.LastIndex(url, "."):]
 			if urlSuffix == ".gif" {
@@ -80,8 +77,13 @@ func (h *Handler) Recv(line string, sender string) {
 				url = strings.Replace(url, ".gifv", ".webm", 1)
 			}
 		}
+		var link *DBLink
+		if linkType == Youtube {
+			link = h.database.GetYoutubeLink(videoId)
+		} else {
+			link = h.database.GetLink(url)
+		}
 
-		link := h.database.GetLink(url)
 		if (*link == DBLink{}) {
 			l := h.database.AddLink(url, linkType, sender)
 			go ImageAction.CheckLink(l)
@@ -99,7 +101,21 @@ func (h *Handler) Recv(line string, sender string) {
 	}
 }
 
-func (h *Handler) Youtube(videoId string, sender string) {
+func (h *Handler) ParseYoutube(url *urlLib.URL) (bool, string) {
+	if strings.Index(url.String(), "youtube.com/watch") > 0 {
+		query, _ := urlLib.ParseQuery(url.RawQuery)
+		return true, query["v"][0]
+
+	} else if strings.Index(url.String(), "://youtu.be/") > 0 {
+		return true, url.Path[1:]
+	}
+	return false, ""
+}
+
+func (h *Handler) Youtube(videoId string) {
+	if "" == GetYoutubeApiKey() {
+		return
+	}
 	var apiUrl = fmt.Sprintf("https://www.googleapis.com/youtube/v3/videos?part=snippet&id=%s&key=%s", videoId, GetYoutubeApiKey())
 	res, err := http.Get(apiUrl)
 	if err != nil {

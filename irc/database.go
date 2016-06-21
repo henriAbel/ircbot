@@ -126,6 +126,14 @@ func (i *IrcDatabase) GetLink(url string) *DBLink {
 	return rowToDBLink(row)
 }
 
+func (i *IrcDatabase) GetYoutubeLink(id string) *DBLink {
+	db := i.Open()
+	defer db.Close()
+	val := "%" + id + "%"
+	row := db.QueryRow("SELECT link.*, user.user_name FROM irc_link AS link LEFT JOIN irc_user AS user on (user.id = link.sender_id) WHERE link.link_type='youtube' AND link.link LIKE ?", val)
+	return rowToDBLink(row)
+}
+
 func (i *IrcDatabase) GetLinkById(id int64) *DBLink {
 	db := i.Open()
 	defer db.Close()
