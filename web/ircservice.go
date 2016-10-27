@@ -10,6 +10,7 @@ import (
 	"time"
 
 	irc "../irc"
+	//log "github.com/Sirupsen/logrus"
 
 	"github.com/ant0ine/go-json-rest/rest"
 )
@@ -49,6 +50,10 @@ type count struct {
 	Count int
 }
 
+type config struct {
+	ExternalLibraries	bool
+}
+
 func NewLinkService() linkService {
 	return linkService{
 		database: irc.IrcDatabase{},
@@ -72,6 +77,11 @@ func transform(dblinks *[]irc.DBLink) *[]link {
 		}
 	}
 	return &links
+}
+
+func (l *linkService) GetConfig(w rest.ResponseWriter, r *rest.Request) {
+	c := config{irc.ImageAction.ExternalLibraries}
+	w.WriteJson(c)
 }
 
 func (l *linkService) GetAll(w rest.ResponseWriter, r *rest.Request) {
@@ -140,9 +150,11 @@ func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 		file, err = os.Open(path.Join(irc.GetDataPath(), "webm", r.PathParam("id")))
 	case irc.RawWebmFrame:
 		file, err = os.Open(path.Join(irc.GetDataPath(), "thumb", r.PathParam("id")))
+	case irc.RawGif:
+		file, err = os.Open(path.Join(irc.GetDataPath(), "gif", r.PathParam("id") + ".gif"))
 	}
 
-	if err != nil {
+	if (err != nil || file == nil) {
 		link := l.database.GetLinkById(resourceId)
 		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")

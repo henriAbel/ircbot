@@ -20,7 +20,7 @@ func newImageAction() *imageAction {
 		database: IrcDatabase{},
 		queue:    make([]*DBLink, 0),
 	}
-
+	action.checkExternalLibraries()
 	ticker := time.NewTicker(time.Millisecond * 500)
 	go func() {
 		for _ = range ticker.C {
@@ -35,11 +35,20 @@ func newImageAction() *imageAction {
 }
 
 // ImageAction - Instance of imageAction struct
-var ImageAction = newImageAction()
+var ImageAction *imageAction
 
 type imageAction struct {
-	database IrcDatabase
-	queue    []*DBLink
+	database 						IrcDatabase
+	queue   					 	[]*DBLink
+	ExternalLibraries		bool
+}
+
+func InitImageAction() {
+	if ImageAction != nil {
+		log.Error("Already initialized")
+	} else {
+		ImageAction = newImageAction()
+	}
 }
 
 // Adds link to queue, non blocking
@@ -61,22 +70,22 @@ func (i *imageAction) CheckLink(link *DBLink) {
 			i.Image(link)
 		} else if notExists(link.Key.Int64, "image") {
 			i.Image(link)
-		} else if notExists(link.Key.Int64, "thumb") {
+		} else if notExists(link.Key.Int64, "thumb") && i.ExternalLibraries {
 			i.Image(link)
 		}
 
 	case WebM:
 		if _, err := i.database.GetRaw(link.Key.Int64, RawWebm); err != nil {
 			i.WebM(link)
-		} else if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
+		} else if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil && i.ExternalLibraries {
 			i.WebM(link)
 		}
 	case Gif:
 		if _, err := i.database.GetRaw(link.Key.Int64, RawGif); err != nil {
 			i.Gif(link)
-		} else if notExists(link.Key.Int64, "webm") {
+		} else if notExists(link.Key.Int64, "webm") && i.ExternalLibraries {
 			i.Gif(link)
-		} else if notExists(link.Key.Int64, "thumb") {
+		} else if notExists(link.Key.Int64, "thumb") && i.ExternalLibraries {
 			i.Gif(link)
 		}
 	}
@@ -109,10 +118,6 @@ func (i *imageAction) Image(link *DBLink) {
 			log.WithField("id", link.Key.Int64).Debugf("Adding %s to raw ", RawImage)
 			i.database.AddRaw(RawImage, link, contentType)
 		}
-		if _, err := i.database.GetRaw(link.Key.Int64, RawImageThumbnail); err != nil {
-			log.WithField("id", link.Key.Int64).Debugf("Adding %s to raw ", RawImageThumbnail)
-			i.database.AddRaw(RawImageThumbnail, link, contentType)
-		}
 
 		imgType := "jpeg"
 		if contentType == "image/png" {
@@ -123,19 +128,25 @@ func (i *imageAction) Image(link *DBLink) {
 		thumbPath := filepath.Join(GetDataPath(), "thumb") + "/"
 		thumbFilePath := filepath.Join(thumbPath, strconv.FormatInt(link.Key.Int64, 10)) + "." + imgType
 		ioutil.WriteFile(filePath, data, os.ModePerm)
-		if runtime.GOOS == "windows" {
-			exec.Command("cmd", "/c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s & rename %s *. ",
-				thumbPath, imgType, filePath, thumbFilePath)).Output()
-		} else {
-			exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
-				thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
-		}
-		if notExists(link.Key.Int64, "thumb") {
-			i.database.RemoveLink(link)
-			os.Remove(filePath)
-			log.WithField("id", link.Key.Int64).Errorf("Can't make thumbnail %s, vips error", link.Link.String)
-		} else {
-			log.WithField("id", link.Key.Int64).Debug("Image download/convert successful")
+		if i.ExternalLibraries {
+			if _, err := i.database.GetRaw(link.Key.Int64, RawImageThumbnail); err != nil {
+				log.WithField("id", link.Key.Int64).Debugf("Adding %s to raw ", RawImageThumbnail)
+				i.database.AddRaw(RawImageThumbnail, link, contentType)
+			}
+			if runtime.GOOS == "windows" {
+				exec.Command("cmd", "/c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s & rename %s *. ",
+					thumbPath, imgType, filePath, thumbFilePath)).Output()
+			} else {
+				exec.Command("sh", "-c", fmt.Sprintf("vipsthumbnail -s 128 -c --interpolator nearest -o %s%%s.%s %s && mv %s %s`basename %s .%s`",
+					thumbPath, imgType, filePath, thumbFilePath, thumbPath, thumbFilePath, imgType)).Output()
+			}
+			if notExists(link.Key.Int64, "thumb") {
+				i.database.RemoveLink(link)
+				os.Remove(filePath)
+				log.WithField("id", link.Key.Int64).Errorf("Can't make thumbnail %s, vips error", link.Link.String)
+			} else {
+				log.WithField("id", link.Key.Int64).Debug("Image download/convert successful")
+			}
 		}
 	} else {
 		log.Errorf("Can't make thumbnail, unknown image format %s %s", contentType, link.Link.String)
@@ -144,7 +155,13 @@ func (i *imageAction) Image(link *DBLink) {
 }
 
 func (i *imageAction) Gif(link *DBLink) {
-	_, data, err := i.Download(link.Link.String)
+	contentType, data, err := i.Download(link.Link.String)
+	log.WithFields(log.Fields{
+		"id":          link.Key.Int64,
+		"ContentType": contentType,
+		"DataLen":     len(data),
+		"Err":         err,
+	}).Debug("Download complete")
 	if err != nil {
 		i.database.RemoveLink(link)
 		log.Infof("Removing dead link %s", link.Link.String)
@@ -162,7 +179,7 @@ func (i *imageAction) Gif(link *DBLink) {
 	framePath := filepath.Join(GetDataPath(), "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 	ioutil.WriteFile(filePath, data, os.ModePerm)
 	gifToWebM(filePath, outPath, framePath)
-	if notExists(link.Key.Int64, "thumb") {
+	if notExists(link.Key.Int64, "thumb") && i.ExternalLibraries {
 		i.database.RemoveLink(link)
 		os.Remove(filePath)
 		os.Remove(outPath)
@@ -190,22 +207,25 @@ func (i *imageAction) WebM(link *DBLink) {
 	if _, err := i.database.GetRaw(link.Key.Int64, RawWebm); err != nil {
 		i.database.AddRaw(RawWebm, link, "video/webm")
 	}
-	if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
-		i.database.AddRaw(RawWebmFrame, link, "image/jpeg")
-	}
 
 	filePath := filepath.Join(GetDataPath(), "/webm/", strconv.FormatInt(link.Key.Int64, 10))
 	framePath := filepath.Join(GetDataPath(), "/thumb/", strconv.FormatInt(link.Key.Int64, 10))
 	ioutil.WriteFile(filePath, data, os.ModePerm)
-	if runtime.GOOS == "windows" {
-		exec.Command("cmd", "/c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
-	} else {
-		exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
-	}
-	if notExists(link.Key.Int64, "thumb") {
-		i.database.RemoveLink(link)
-		os.Remove(filePath)
-		log.WithField("id", link.Key.Int64).Error("WebM convert error")
+	if i.ExternalLibraries {
+		if runtime.GOOS == "windows" {
+			exec.Command("cmd", "/c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+		} else {
+			exec.Command("sh", "-c", fmt.Sprintf("ffmpeg -y -i %s -f image2 -ss 00 -vframes 1 %s", filePath, framePath)).Output()
+		}
+		if notExists(link.Key.Int64, "thumb") {
+			i.database.RemoveLink(link)
+			os.Remove(filePath)
+			log.WithField("id", link.Key.Int64).Error("WebM convert error")
+		} else {
+			if _, err := i.database.GetRaw(link.Key.Int64, RawWebmFrame); err != nil {
+				i.database.AddRaw(RawWebmFrame, link, "image/jpeg")
+			}
+		}
 	}
 }
 
@@ -236,9 +256,31 @@ func (i *imageAction) StartupCheck() {
 		filePath := filepath.Join(GetDataPath(), "/gif/", t.Name())
 		outPath := filepath.Join(GetDataPath(), "/webm/", baseName)
 		framePath := filepath.Join(GetDataPath(), "/thumb/", baseName)
-		gifToWebM(filePath, outPath, framePath)
+		if i.ExternalLibraries {
+			gifToWebM(filePath, outPath, framePath)
+		}
 	}
 	// TODO check missing thumbnails
+}
+
+func (i *imageAction) checkExternalLibraries() {
+	// Check if ffmpeg and libvips are present
+	fmp := i.commandExists("ffmpeg")
+	vps := i.commandExists("vipsthumbnail")
+	log.WithFields(log.Fields{
+		"FFmpeg": fmp,
+		"Libvips-tools": vps,
+	}).Debug("Checking external libraries")
+	i.ExternalLibraries =  fmp && vps
+	if !i.ExternalLibraries {
+		log.Error("External libraries are missing, image and video files are not converted/resized!")
+	}
+}
+
+func (i *imageAction) commandExists(commandName string) bool {
+	cmd := exec.Command("which", commandName)
+	err := cmd.Run()
+	return err == nil
 }
 
 func gifToWebM(filePath, outPath, framePath string) {

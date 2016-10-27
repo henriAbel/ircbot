@@ -79,6 +79,7 @@ func StartWeb() {
 	apiRouter, _ := rest.MakeRouter(
 		rest.Post("/login", jwtMiddleware.LoginHandler),
 		rest.Get("/refresh_token", jwtMiddleware.RefreshHandler),
+		rest.Get("/config", service.GetConfig),
 		rest.Get("/links", service.GetAll),
 		rest.Get("/links/count", service.GetCount),
 		rest.Get("/raw/:id/:type", service.Raw),

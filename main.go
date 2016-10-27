@@ -26,7 +26,7 @@ func main() {
 		fmt.Println("Cannot read config file!")
 		os.Exit(3)
 	}
-	irc.Init(os.Args[1])
+	irc.InitConf(os.Args[1])
 	if len(irc.GetLogFile()) > 0 {
 		f, err := os.OpenFile(irc.GetLogFile(), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 		if err != nil {
@@ -45,6 +45,7 @@ func main() {
 
 	log.SetLevel(log.DebugLevel)
 	log.Infof("<<<<<----- Application started %s ----->>>>>", time.Now())
+	irc.InitImageAction()
 	CheckAndCreate(irc.GetDataPath())
 	CheckAndCreate(filepath.Join(irc.GetDataPath(), "thumb"))
 	CheckAndCreate(filepath.Join(irc.GetDataPath(), "image"))

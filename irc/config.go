@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Init(configFile string) {
+func InitConf(configFile string) {
 	cfgData, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		fmt.Println(err)

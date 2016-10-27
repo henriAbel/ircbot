@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ircbotApp').directive('ngLink', function($sce) {
+angular.module('ircbotApp').directive('ngLink', ['$sce', '$rootScope', function($sce, $rootScope) {
 	var getValueFromQuery = function(query, val) {
 		var vars = query.substring(query.indexOf('?') + 1 ).split('&');
 		for (var i = 0; i < vars.length; i++) {
@@ -22,9 +22,14 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 			};
 			if (scope.ngModel.Link_type == "image") {
 				scope.contentUrl = formatUrl('/views/imageView.html')
-				scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/thumb")
-				scope.imageClick = function(e) {
-					showImage(e, addToken("/api/raw/" + scope.ngModel.Key + "/image"));
+				if ($rootScope.config.ExternalLibraries) {
+					scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/thumb")
+					scope.imageClick = function(e) {
+						showImage(e, addToken("/api/raw/" + scope.ngModel.Key + "/image"));
+					}
+				}
+				else {
+					scope.imageUrl = addToken("/api/raw/" + scope.ngModel.Key + "/image")
 				}
 			}
 			else if (scope.ngModel.Link_type == "youtube") {
@@ -65,12 +70,18 @@ angular.module('ircbotApp').directive('ngLink', function($sce) {
 				scope.contentUrl = formatUrl('/views/linkView.html');
 			}
 			else if (scope.ngModel.Link_type == "webm" || scope.ngModel.Link_type == "gif") {
-				scope.contentUrl = formatUrl('/views/webmView.html');
-				scope.thumbUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm1");
-				scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm");
+				if ($rootScope.config.ExternalLibraries) {
+						scope.contentUrl = formatUrl('/views/webmView.html');
+						scope.thumbUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm1");
+						scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/webm");
+				}
+				else {
+					scope.contentUrl = formatUrl('/views/gifView.html');
+					scope.videoUrl = addToken("/api/raw/" + scope.ngModel.Key + "/gif");
+				}
 			}
 		},
 		template: '<div class="content-wrap" ng-include="contentUrl"></div>',
 		replace: true,
 	}
-});
+}]);

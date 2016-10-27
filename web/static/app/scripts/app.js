@@ -52,10 +52,11 @@ angular
 			});
 		$httpProvider.interceptors.push('AuthInterceptor');
 	}])
-	.run(['$document', '$rootScope', function($document, $rootScope) {
+	.run(['$document', '$rootScope', 'ConfigProvider', function($document, $rootScope, ConfigProvider) {
 		$document.bind('keyup', function(e) {
 			$rootScope.$broadcast('keypress', e);
 		});
+		$rootScope.config = ConfigProvider.get();
 	}]);
 
 // TODO Remove??
