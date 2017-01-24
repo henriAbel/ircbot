@@ -9,7 +9,7 @@ angular
 		'ngRoute',
 		'ngSanitize'
 	])
-	.config(['$routeProvider', '$httpProvider', function ($routeProvider, $httpProvider) {
+	.config(['$routeProvider', '$httpProvider', '$locationProvider', function ($routeProvider, $httpProvider, $locationProvider) {
 		$routeProvider
 			.when('/', {
 				templateUrl: 'views/list.html',
@@ -51,6 +51,7 @@ angular
 				redirectTo: '/'
 			});
 		$httpProvider.interceptors.push('AuthInterceptor');
+ 		$locationProvider.hashPrefix('');
 	}])
 	.run(['$document', '$rootScope', 'ConfigProvider', function($document, $rootScope, ConfigProvider) {
 		$document.bind('keyup', function(e) {
