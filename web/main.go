@@ -67,7 +67,7 @@ func StartWeb() {
 				if len(token) > 0 {
 					request.Header.Add("Authorization", "Bearer "+token[0])
 				}
-				return request.URL.Path != "/login"
+				return request.URL.Path != "/login" && request.URL.Path != "/config"
 			}
 			return false
 		},

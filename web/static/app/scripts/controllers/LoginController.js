@@ -10,10 +10,10 @@
             data: {
                 password: password
             }
-        }).success(function (data, status, headers, config) {
-        	$window.sessionStorage.token = data.token;
+        }).then(function(response) {
+        	$window.sessionStorage.token = response.data.token;
         	$location.path('/');
-        }).error(function(error) {
+        }, function(error) {
         	$scope.loginError = error.Error;
 			$scope.loading = false;
         });

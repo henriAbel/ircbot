@@ -57,7 +57,10 @@ angular
 		$document.bind('keyup', function(e) {
 			$rootScope.$broadcast('keypress', e);
 		});
-		$rootScope.config = ConfigProvider.get();
+		ConfigProvider.get().$promise.then(function(response) {
+			$rootScope.config = response.data;
+		}, function(err) {});
+		
 	}]);
 
 // TODO Remove??
