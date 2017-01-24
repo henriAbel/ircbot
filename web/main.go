@@ -92,7 +92,7 @@ func StartWeb() {
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
 	mux.Handle("/bower_components/", http.FileServer(http.Dir("./web/static/")))
-	mux.Handle("/", http.FileServer(http.Dir("./web/static/app/")))
+	mux.Handle("/", http.FileServer(http.Dir("./web/static/dist/")))
 
 	l, err := net.Listen("tcp", listeningPort)
 	if err != nil {

@@ -94,7 +94,7 @@ func main() {
 	err := connect()
 	if err != nil {
 		log.Errorf(err.Error())
-		handleDisconnect()
+		go handleDisconnect()
 	}
 	go irc.ImageAction.StartupCheck()
 	web.StartWeb()
