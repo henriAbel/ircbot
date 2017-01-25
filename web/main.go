@@ -60,8 +60,18 @@ func StartWeb() {
 
 	api := rest.NewApi()
 	api.Use(DefaultDevStack...)
+	api.Use(&rest.CorsMiddleware{
+		RejectNonCorsRequests: false,
+		OriginValidator: func(_ string, _ *rest.Request) bool {
+			return true
+		},
+		AllowedMethods: []string{"GET", "POST", "PUT"},
+		AllowedHeaders: []string{
+			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
+	})
 	api.Use(&rest.IfMiddleware{
 		Condition: func(request *rest.Request) bool {
+			return false
 			if len(irc.GetWebPassword()) > 1 {
 				token := request.Request.URL.Query()["authorization"]
 				if len(token) > 0 {
@@ -92,7 +102,7 @@ func StartWeb() {
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
 	mux.Handle("/bower_components/", http.FileServer(http.Dir("./web/static/")))
-	mux.Handle("/", http.FileServer(http.Dir("./web/static/dist/")))
+	mux.Handle("/", http.FileServer(http.Dir("./web/static/app/")))
 
 	l, err := net.Listen("tcp", listeningPort)
 	if err != nil {
