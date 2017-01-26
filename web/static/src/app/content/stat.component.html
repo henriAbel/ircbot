@@ -1,0 +1,12 @@
+<div *ngIf="linkData.labels.length > 0">
+    <h3>Link types</h3>
+    <chart [type]="type" [data]="linkData" [options]="options"></chart>
+</div>
+<div *ngIf="userData.labels.length > 0">
+    <h3>User activity</h3>
+    <chart [type]="type" [data]="userData" [options]="options"></chart>
+</div>
+<div *ngIf="duplicateData.labels.length > 0">
+    <h3>Duplicate links</h3>
+    <chart [type]="type" [data]="duplicateData" [options]="options"></chart>
+</div>

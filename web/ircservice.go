@@ -29,17 +29,6 @@ type link struct {
 	Sender_name string
 }
 
-type statGroupLink struct {
-	Count int64
-	Type  string
-}
-
-type statGroupUser struct {
-	Count     int64
-	User_name string
-	Sender_id int64
-}
-
 type stats struct {
 	GroupLink  *[]irc.DBStatGroupLink
 	GroupUser  *[]irc.DBStatGroupUser
@@ -51,7 +40,7 @@ type count struct {
 }
 
 type config struct {
-	ExternalLibraries	bool
+	ExternalLibraries bool
 }
 
 func NewLinkService() linkService {
@@ -151,10 +140,10 @@ func (l *linkService) Raw(w rest.ResponseWriter, r *rest.Request) {
 	case irc.RawWebmFrame:
 		file, err = os.Open(path.Join(irc.GetDataPath(), "thumb", r.PathParam("id")))
 	case irc.RawGif:
-		file, err = os.Open(path.Join(irc.GetDataPath(), "gif", r.PathParam("id") + ".gif"))
+		file, err = os.Open(path.Join(irc.GetDataPath(), "gif", r.PathParam("id")+".gif"))
 	}
 
-	if (err != nil || file == nil) {
+	if err != nil || file == nil {
 		link := l.database.GetLinkById(resourceId)
 		w.WriteHeader(503)
 		w.Header().Set("Cache-Control", "no-cache, must-revalidate")

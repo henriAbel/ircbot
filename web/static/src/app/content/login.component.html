@@ -1,0 +1,16 @@
+<div>
+	<h2>Login</h2>
+    <form (ngSubmit)="onSubmit()">
+		<fieldset>
+			<div>
+				<label for="login-password">Password</label>
+				<input id="login-password" type="password" name="model" [(ngModel)]="model">
+			</div>
+            <p *ngIf="!loading">{{errorMessage}}</p>
+			<button>
+				<span *ngIf="loading">Loading ...</span>
+				<span *ngIf="!loading">Enter</span>
+			</button>
+		</fieldset>
+	</form>
+</div>

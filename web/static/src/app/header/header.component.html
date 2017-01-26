@@ -1,0 +1,8 @@
+<nav>
+  <a routerLinkActive="active" routerLink="/">Images</a> |
+  <a routerLinkActive="active" routerLink="/links">Links</a> |
+  <a routerLinkActive="active" routerLink="/youtube">Youtube</a> |
+  <a routerLinkActive="active" routerLink="/video">Video/GIF</a> |
+  <a routerLinkActive="active" routerLink="/stats">Statistic</a>
+  <a *ngIf="loggedIn" routerLink="/logout">Log out</a>
+</nav>

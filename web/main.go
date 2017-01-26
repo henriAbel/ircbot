@@ -65,13 +65,12 @@ func StartWeb() {
 		OriginValidator: func(_ string, _ *rest.Request) bool {
 			return true
 		},
-		AllowedMethods: []string{"GET", "POST", "PUT"},
-		AllowedHeaders: []string{
-			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
+		AllowedMethods:                []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowedHeaders:                []string{"access-control-allow-credentials", "access-control-allow-headers", "access-control-allow-methods", "access-control-allow-origin", "authorization", "content-type", "token"},
+		AccessControlAllowCredentials: true,
 	})
 	api.Use(&rest.IfMiddleware{
 		Condition: func(request *rest.Request) bool {
-			return false
 			if len(irc.GetWebPassword()) > 1 {
 				token := request.Request.URL.Query()["authorization"]
 				if len(token) > 0 {
@@ -101,8 +100,7 @@ func StartWeb() {
 	enableTls := len(irc.GetCertFile()) > 0 && len(irc.GetKeyFile()) > 0
 	mux := http.NewServeMux()
 	mux.Handle("/api/", http.StripPrefix("/api", api.MakeHandler()))
-	mux.Handle("/bower_components/", http.FileServer(http.Dir("./web/static/")))
-	mux.Handle("/", http.FileServer(http.Dir("./web/static/app/")))
+	mux.Handle("/", http.FileServer(http.Dir("./web/static/dist/")))
 
 	l, err := net.Listen("tcp", listeningPort)
 	if err != nil {

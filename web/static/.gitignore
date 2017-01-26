@@ -18,6 +18,7 @@ coverage
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
+.tmp
 
 # Users Environment Variables
 .lock-wscript
@@ -53,3 +54,4 @@ __build__/**
 # IDE #
 .idea/
 *.swp
+.vscode

@@ -1,0 +1,19 @@
+<template ngFor let-key [ngForOf]="links">
+    <template [ngIf]="key.Link_type == 'link'">
+        <a [href]="key.Link">{{key.Link}}</a>
+    </template>
+
+    <template [ngIf]="key.Link_type == 'image'">
+        <img [src]="key.Link" [alt]="key.Sender_name" />
+    </template>
+
+    <template [ngIf]="key.Link_type == 'gif' || key.Link_type == 'webm'">
+        <video [src]="getRawLink(key)" controls></video>
+    </template>
+    
+    <template [ngIf]="key.Link_type == 'youtube'">
+        <iframe width="420" height="315"
+            [src]="sanitize('https://www.youtube.com/embed/' + getYoutubeIdFromUrl(key))">
+        </iframe>
+    </template>
+</template>
