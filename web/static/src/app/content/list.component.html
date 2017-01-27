@@ -1,19 +1,33 @@
-<template ngFor let-key [ngForOf]="links">
-    <template [ngIf]="key.Link_type == 'link'">
-        <a [href]="key.Link">{{key.Link}}</a>
-    </template>
+<template ngFor let-key [ngForOf]="links" >
+    <ng-container  [ngSwitch]="key.Link_type">
+        <template [ngSwitchCase]="'fullView'">
+            <div (click)="closeFullView()" class="fullview">
+                <p>{{key.Sender_name}}</p>
+                <img [src]="getRawLink(key, 'image')" [alt]="key.Sender_name" />
+            </div>
+            <br />
+        </template>
 
-    <template [ngIf]="key.Link_type == 'image'">
-        <img [src]="key.Link" [alt]="key.Sender_name" />
-    </template>
+        <template [ngSwitchCase]="'link'">
+            <a [href]="key.Link">{{key.Link}}</a>
+        </template>
 
-    <template [ngIf]="key.Link_type == 'gif' || key.Link_type == 'webm'">
-        <video [src]="getRawLink(key)" controls></video>
-    </template>
-    
-    <template [ngIf]="key.Link_type == 'youtube'">
-        <iframe width="420" height="315"
-            [src]="sanitize('https://www.youtube.com/embed/' + getYoutubeIdFromUrl(key))">
-        </iframe>
-    </template>
+        <template [ngSwitchCase]="'image'">
+            <img #thumbImage (click)="activate(key)" [src]="getRawLink(key, 'thumb')" [alt]="key.Sender_name" />
+        </template>
+
+        <template [ngSwitchCase]="'webm'||'gif'">
+            <video [src]="getRawLink(key)" controls></video>
+        </template>
+        
+        <template [ngSwitchCase]="'youtube'">
+            <iframe width="420" height="315"
+                [src]="sanitize('https://www.youtube.com/embed/' + getYoutubeIdFromUrl(key))">
+            </iframe>
+        </template>
+    </ng-container >
 </template>
+
+<button *ngIf="((page + 1) * itemsInPage) < linkCount" (click)="next()">Next page</button>
+Page: {{page}}
+<button *ngIf="page > 0" (click)="prev()">Previous page</button>

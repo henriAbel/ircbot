@@ -11,8 +11,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 export class LoginComponent implements OnInit {
 
   model: string;
-  loading: boolean;  
-  errorMessage: string = '';
+  loading: boolean;
+  errorMessage = '';
 
   constructor(private apiService: ApiService, private authService: AuthService, private router: Router, private route: ActivatedRoute) {
     this.loading = false;
@@ -26,7 +26,7 @@ export class LoginComponent implements OnInit {
           this.router.navigate(['/']);
         }
       }
-    })
+    });
   }
 
   onSubmit() {
@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
     this.apiService.doLogin(this.model).subscribe(res => {
       this.authService.setToken(res.token);
       this.router.navigate(['/']);
-    }, 
+    },
     err => {
       this.loading = !1;
       this.errorMessage = err;

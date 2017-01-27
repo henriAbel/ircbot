@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../shared/'
+import { ApiService } from '../shared/';
 
 @Component({
   selector: 'irc-stat',
@@ -7,15 +7,15 @@ import { ApiService } from '../shared/'
 })
 export class StatComponent implements OnInit {
 
-  private colors = ['#1BE7FF', '#6EEB83', '#E4FF1A', '#E8AA14', '#FF5714', '#50514F', '#F25F5C', '#247BA0', '#70C1B3'];
-  private type: string;
-  private options: any;
-  private linkData: any;
-  private userData: any;
-  private duplicateData: any; 
+  colors = ['#1BE7FF', '#6EEB83', '#E4FF1A', '#E8AA14', '#FF5714', '#50514F', '#F25F5C', '#247BA0', '#70C1B3'];
+  type: string;
+  options: any;
+  linkData: any;
+  userData: any;
+  duplicateData: any;
 
-  constructor(private apiService: ApiService) { 
-    this.type = 'doughnut'
+  constructor(private apiService: ApiService) {
+    this.type = 'doughnut';
     this.options = {
       responsive: true,
       maintainAspectRatio: false
@@ -30,7 +30,7 @@ export class StatComponent implements OnInit {
   }
 
   shuffle(o) {
-    for (let j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+    for (let j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x ) {};
   }
   getColor(i) {
     if (this.colors.length <= i) {
@@ -44,7 +44,7 @@ export class StatComponent implements OnInit {
     this.shuffle(this.colors);
     this.apiService.getStats().subscribe(data => {
       for (let i = 0; i < data.GroupLink.length; i++) {
-        let e = data.GroupLink[i]
+        let e = data.GroupLink[i];
         this.linkData.labels.push(this.capitalizeFirstLetter(e.Type));
         this.linkData.datasets[0].data.push(e.Count);
         this.linkData.datasets[0].backgroundColor.push(this.getColor(i));
@@ -61,7 +61,7 @@ export class StatComponent implements OnInit {
         this.duplicateData.datasets[0].data.push(e.Count);
         this.duplicateData.datasets[0].backgroundColor.push(this.getColor(i));
       }
-    })
+    });
   }
 
   initDataSets(): any {
@@ -71,7 +71,7 @@ export class StatComponent implements OnInit {
         data: [],
         backgroundColor: []
       }]
-    }
+    };
   }
 
 }

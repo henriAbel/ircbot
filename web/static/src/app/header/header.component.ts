@@ -8,7 +8,7 @@ import { AuthService } from '../auth/auth.service';
 })
 export class HeaderComponent implements OnInit {
 
-  private loggedIn: boolean = false;
+  private loggedIn = false;
   constructor(private authService: AuthService) {
     this.loggedIn = this.authService.hasToken();
   }
@@ -16,6 +16,6 @@ export class HeaderComponent implements OnInit {
   ngOnInit() {
     this.authService.onTokenUpdated.subscribe((newStatus: boolean) => {
       this.loggedIn = newStatus;
-    });    
+    });
   }
 }

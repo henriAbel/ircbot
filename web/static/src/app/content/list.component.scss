@@ -1,0 +1,20 @@
+img {
+    float: left;
+    padding: 5px;
+}
+
+.fullview {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    background-color: black;
+    padding: 10px 0;
+
+    p {
+        color: white;
+    }
+    
+    img {
+        float: none;
+    }
+}

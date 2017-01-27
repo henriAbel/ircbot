@@ -21,8 +21,11 @@ export class ApiService {
       .catch(this.handleError);
   }
 
-  getLinkCount(): Observable<number> {
-    return this.http.get(this.apiUrl + 'links/count', this.doOptions())
+  getLinkCount(filter?: string): Observable<any> {
+    let opts = this.doOptions({
+      filter: filter
+    });
+    return this.http.get(this.apiUrl + 'links/count', opts)
       .map(this.extractData)
       .catch(this.handleError);
   }

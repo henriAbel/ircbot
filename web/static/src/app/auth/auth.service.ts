@@ -8,7 +8,9 @@ export class AuthService {
 
   constructor() {
     this.token = sessionStorage.getItem('irc-token');
-    if (this.token === null) this.token = undefined;
+    if (this.token === null) {
+      this.token = undefined;
+    }
   }
 
   hasToken(): boolean {
@@ -23,10 +25,9 @@ export class AuthService {
     this.token = token;
     if (this.token === undefined) {
       sessionStorage.removeItem('irc-token');
-    }
-    else {
+    } else {
       sessionStorage.setItem('irc-token', this.token);
     }
     this.onTokenUpdated.emit(this.hasToken());
-  }  
+  }
 }
