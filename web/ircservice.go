@@ -10,7 +10,6 @@ import (
 	"time"
 
 	irc "../irc"
-	//log "github.com/Sirupsen/logrus"
 
 	"github.com/ant0ine/go-json-rest/rest"
 )

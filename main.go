@@ -10,7 +10,7 @@ import (
 
 	irc "./irc"
 	web "./web"
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	client "github.com/fluffle/goirc/client"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
